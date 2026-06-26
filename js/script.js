@@ -188,16 +188,20 @@ function renderOSList() {
   }).join('');
 }
 
-// 2. FUNÇÃO ATUALIZADA PARA ENVIAR MENSAGEM DIRETAMENTE AO TELEFONE DO TÉCNICO ATRIBUÍDO
+// 2. FUNÇÃO ATUALIZADA PARA ENVIAR MENSAGEM COM O ID ESPECÍFICO VIA QUERY STRING (?os=ID)
 function makeWALink(os) {
   const tecObj = os.tec ? TEC[os.tec] : null;
   const phone = tecObj?.phone ? tecObj.phone : '';
+  
+  // Remove qualquer parâmetro antigo da URL base para gerar o link limpo
+  const baseUrl = window.location.href.split('?')[0];
+  const linkTecnico = `${baseUrl}?os=${os.id}`;
   
   const msg = `*ORDEM DE SERVIÇO — ${os.chamado || 'S/N'}*\n\n` +
     `*Problema:* ${os.problema}\n` +
     `*Local:* ${os.area || '—'}\n` +
     `*Data:* ${fmtDate(os.data)}\n\n` +
-    `Acesse para preencher e assinar:\n${window.location.href}`;
+    `Acesse para preencher e assinar:\n${linkTecnico}`;
     
   if (phone) {
     return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
@@ -351,6 +355,8 @@ function renderPecasList() {
 }
 
 function initCanvases(osId) {
+  const os = db.find(x => x.id === osId);
+  
   ['sig-tec', 'sig-sol', 'sig-acomp'].forEach((cid, i) => {
     const canvas = document.getElementById(cid);
     if (!canvas) return;
@@ -358,6 +364,16 @@ function initCanvases(osId) {
     canvas.width = canvas.offsetWidth || 380;
     const ctx = canvas.getContext('2d');
     ctx.strokeStyle = '#1C1C1A'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    
+    // Recupera e renderiza a assinatura salva anteriormente se ela existir
+    const savedSig = os ? [os.sigTec, os.sigSol, os.sigAcomp][i] : null;
+    if (savedSig) {
+      const img = new Image();
+      img.src = savedSig;
+      img.onload = () => { ctx.drawImage(img, 0, 0); };
+      ph.classList.add('hidden'); // Esconde a mensagem de placeholder
+    }
+
     let drawing = false, lx = 0, ly = 0;
     function pos(e) {
       const r = canvas.getBoundingClientRect();
@@ -370,7 +386,6 @@ function initCanvases(osId) {
     canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', draw); canvas.addEventListener('mouseup', end); canvas.addEventListener('mouseleave', end);
     canvas.addEventListener('touchstart', start, { passive: false }); canvas.addEventListener('touchmove', draw, { passive: false }); canvas.addEventListener('touchend', end);
   });
-  const os = db.find(x => x.id === osId);
   pecas = os?.pecas ? [...os.pecas] : [];
   renderPecasList();
 }
@@ -391,9 +406,12 @@ function getSig(cid) {
 
 function confirmarOS(id) {
   const os = db.find(x => x.id === id); if (!os) return;
-  os.sigTec = getSig('sig-tec');
-  os.sigSol = getSig('sig-sol');
-  os.sigAcomp = getSig('sig-acomp');
+  
+  // Captura e armazena permanentemente os dados das assinaturas no objeto global da OS
+  os.sigTec = getSig('sig-tec') || os.sigTec;
+  os.sigSol = getSig('sig-sol') || os.sigSol;
+  os.sigAcomp = getSig('sig-acomp') || os.sigAcomp;
+  
   os.pecas = [...pecas];
   os.iniciada = document.getElementById('tec-inicio')?.value || null;
   os.concluida = document.getElementById('tec-fim')?.value || null;
@@ -405,9 +423,15 @@ function confirmarOS(id) {
   
   os.ssma = { ...ssmaRespostas };
   if (os.sigTec || os.sigSol) os.status = 'assinando';
+  
   save();
   toast('Dados operacionais e segurança salvos! ✔');
-  renderOSList();
+  
+  // Se estiver acessando de fora do link isolado, atualiza a listagem geral
+  const urlParams = new URLSearchParams(window.location.search);
+  if (!urlParams.get('os')) {
+    renderOSList();
+  }
 }
 
 function gerarPDF(id) {
@@ -516,7 +540,30 @@ function gerarPDF(id) {
 function fmtDate(d) { if (!d) return '—'; try { return new Date(d + 'T12:00').toLocaleDateString('pt-BR'); } catch { return d; } }
 function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
 
+// INTERCEPTA A URL LOGO NO INÍCIO PARA ISOLAR A TELA SE HOUVER PARÂMETRO DA OS
 window.onload = () => {
   document.getElementById('f-data').value = new Date().toISOString().slice(0, 10);
-  renderPainel();
+  
+  const urlParams = new URLSearchParams(window.location.search);
+  const osIsoladaId = urlParams.get('os');
+  
+  if (osIsoladaId) {
+    // Esconde o menu superior/lateral de navegação administrativa para o técnico
+    const sidebar = document.querySelector('.sidebar-container');
+    if (sidebar) sidebar.style.display = 'none';
+    
+    // Força a entrada direta na visualização da página operacional carregando a OS correta
+    goView('tec-link');
+    
+    // Seleciona e renderiza apenas a OS correspondente
+    const selectOS = document.getElementById('tec-os-select');
+    if (selectOS) {
+      renderTecSelect();
+      selectOS.value = osIsoladaId;
+    }
+    renderTecPage(osIsoladaId);
+  } else {
+    // Carregamento padrão administrativo caso não seja link direto
+    renderPainel();
+  }
 };
