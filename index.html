@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema OS — Manutenção</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <aside class="sidebar-container">
+      <div class="logo">⚙ Manutenção</div>
+      <nav class="nav-menu">
+        <button class="nav-btn active" id="nav-painel" onclick="goView('painel')">📊 Painel Geral</button>
+        <button class="nav-btn" id="nav-os" onclick="goView('os')">🔧 Ordens de Serviço</button>
+        <button class="nav-btn" id="nav-tec-link" onclick="goView('tec-link')">📱 Link do Técnico</button>
+      </nav>
+    </aside>
+
+    <main class="main-content-container">
+      
+      <section class="view-container active" id="view-painel">
+        <header class="header-row">
+          <h1 class="h1">Painel Executivo</h1>
+        </header>
+        
+        <div class="grid-kpi" id="kpis"></div>
+        
+        <div class="panel-row-container">
+          <article class="panel-card">
+            <header class="card-h">
+              <span class="card-t">Sintomas / Ocorrências Recorrentes</span>
+              <span class="card-n" id="prob-n">0 tipos</span>
+            </header>
+            <div id="prob-rank" class="rank-list"></div>
+          </article>
+          
+          <article class="panel-card">
+            <header class="card-h">
+              <span class="card-t">Histórico de Atendimento (6 Meses)</span>
+            </header>
+            <div class="chart-w" id="month-chart"></div>
+            
+            <header class="card-h sub-header">
+              <span class="card-t">Últimas Atualizações</span>
+            </header>
+            <div id="ultimas-list" class="updates-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view-container" id="view-os">
+        <header class="header-row">
+          <h1 class="h1">Ordens de Serviço</h1>
+          <button class="btn btn-primary" onclick="openDrawer()">＋ Nova OS</button>
+        </header>
+        
+        <nav class="filters-container">
+          <div class="f-chip on" onclick="setFilter('all',this)">Todas</div>
+          <div class="f-chip" onclick="setFilter('aberto',this)">Abertas</div>
+          <div class="f-chip" onclick="setFilter('andamento',this)">Andamento</div>
+          <div class="f-chip" onclick="setFilter('assinando',this)">Aguard. Assinatura</div>
+          <div class="f-chip" onclick="setFilter('fechado',this)">Fechadas</div>
+        </nav>
+        
+        <div class="os-grid-container" id="os-list"></div>
+      </section>
+
+      <section class="view-container" id="view-tec-link">
+        <header class="header-row">
+          <h1 class="h1">Portal de Assinatura e Execução</h1>
+        </header>
+        
+        <div class="simulation-selector-container">
+          <div class="field">
+            <label>Simular Técnico Acessando OS:</label>
+            <select id="tec-os-select" onchange="renderTecPage(this.value)"></select>
+          </div>
+        </div>
+        
+        <div id="tec-page-wrap" class="tec-simulation-container">
+          <div class="empty">
+            <div class="empty-icon">📱</div>
+            <p>Selecione uma OS acima para abrir a tela de fechamento do técnico.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <button id="fab" onclick="openDrawer()">＋</button>
+
+  <div class="overlay" id="ov1" onclick="closeDrawer()"></div>
+  <section class="drawer-container" id="drawer1">
+    <header class="drawer-h">
+      <h3 id="drawer-title">Nova OS</h3>
+      <button class="btn btn-sm" onclick="closeDrawer()">✕</button>
+    </header>
+    
+    <form class="drawer-b" onsubmit="event.preventDefault();">
+      <div class="form-row-2col">
+        <div class="field"><label>N° Chamado / OS</label><input id="f-chamado" placeholder="Ex: 24551"></div>
+        <div class="field"><label>Data Abertura</label><input type="date" id="f-data"></div>
+      </div>
+      <div class="field">
+        <label>Tipo de Ocorrência / Sintoma</label>
+        <input id="f-problema" placeholder="Ex: Vazamento de água, lâmpada queimada" list="prob-dl">
+        <datalist id="prob-dl"></datalist>
+      </div>
+      <div class="form-row-2col">
+        <div class="field">
+          <label>Especialidade</label>
+          <select id="f-esp">
+            <option value="Predial">Predial</option>
+            <option value="Elétrica">Elétrica</option>
+            <option value="Hidráulica">Hidráulica</option>
+            <option value="Mecânica">Mecânica</option>
+          </select>
+        </div>
+        <div class="field"><label>Solicitante</label><input id="f-solicitante" placeholder="Ex: Carlos - RH"></div>
+      </div>
+      <div class="field"><label>Local / Área</label><input id="f-area" placeholder="Ex: Bloco B - 2º Andar"></div>
+      <div class="field"><label>Descrição Detalhada do Chamado</label><textarea id="f-desc" placeholder="Descreva mais detalhes caso necessário..."></textarea></div>
+      
+      <div class="field">
+        <label>Técnico Responsável</label>
+        <div class="tec-grid">
+          <div class="tec-opt" id="to-j" onclick="selTec('jhonatan')"><div class="tav av-j">JH</div><span>Jhonatan</span></div>
+          <div class="tec-opt" id="to-jo" onclick="selTec('jorge')"><div class="tav av-jo">JO</div><span>Jorge F.</span></div>
+          <div class="tec-opt" id="to-zh" onclick="selTec('hugo')"><div class="tav av-zh">ZH</div><span>Zé Hugo</span></div>
+        </div>
+      </div>
+      
+      <div class="field">
+        <label>Status Operacional</label>
+        <div class="status-row">
+          <div class="st" data-s="aberto" onclick="selStatus(this)">Aberto</div>
+          <div class="st" data-s="andamento" onclick="selStatus(this)">Andamento</div>
+          <div class="st" data-s="concluido" onclick="selStatus(this)">Concluído</div>
+          <div class="st" data-s="fechado" onclick="selStatus(this)">Fechado</div>
+        </div>
+      </div>
+    </form>
+    
+    <footer class="drawer-f">
+      <button class="btn" onclick="closeDrawer()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveOS()">Salvar Registro</button>
+    </footer>
+  </section>
+
+  <div id="toast"></div>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
