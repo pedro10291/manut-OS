@@ -871,98 +871,120 @@ textarea {
 }
 
 /* ==========================================
-   Responsividade Mobile Corrigida (Com Menu)
+   Responsividade Mobile Corrigida e Alinhada
    ========================================== */
 @media(max-width: 768px) {
-  /* Muda de duas colunas para uma coluna vertical (Menu em cima, Conteúdo embaixo) */
+  /* Altera para fluxo vertical total */
   .app-container { 
-    grid-template-columns: 1fr; 
+    grid-template-columns: 1fr !important; 
+    display: flex !important;
+    flex-direction: column !important;
     height: auto !important;
+    min-height: 100vh;
   }
   
-  /* Em vez de esconder (display: none), transforma a barra lateral em um menu de topo */
+  /* Corrige o menu do topo para não empurrar ou criar espaços em branco fixos */
   .sidebar-container { 
-    display: flex; 
-    flex-direction: column; /* Alinha o Logo e os Botões verticalmente no topo */
-    gap: 12px;
-    padding: 16px;
-    border-right: none;
-    border-bottom: 1px solid var(--border); /* Linha divisória embaixo do menu */
-    background: var(--surface);
-    width: 100%;
+    display: flex !important; 
+    flex-direction: column !important;
+    gap: 12px !important;
+    padding: 16px !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    background: var(--surface) !important;
+    width: 100% !important;
+    height: auto !important; /* Impede que o menu ocupe metade da tela */
   }
 
-  /* Faz os botões ficarem lado a lado na horizontal */
+  /* Organiza os botões em linha horizontal com rolagem suave */
   .nav-menu {
-    flex-direction: row;
-    gap: 6px;
-    width: 100%;
-    overflow-x: auto; /* Se a tela for muito pequena, permite deslizar os botões pro lado */
-    padding-bottom: 4px;
-    scrollbar-width: none; /* Remove barra de rolagem visual no Firefox */
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    width: 100% !important;
+    overflow-x: auto !important; 
+    padding-bottom: 4px !important;
+    -webkit-overflow-scrolling: touch;
   }
   
   .nav-menu::-webkit-scrollbar {
-    display: none; /* Remove barra de rolagem visual no Chrome/Safari */
+    display: none !important; /* Esconde barra feia no mobile */
   }
 
-  /* Ajusta o tamanho dos botões para caberem lado a lado */
   .nav-btn {
-    padding: 8px 12px;
-    font-size: 13px;
-    white-space: nowrap; /* Impede o texto do botão de quebrar linha */
-    flex: 1;
-    justify-content: center;
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+    white-space: nowrap !important; /* Não deixa o texto quebrar */
+    flex: 0 0 auto !important; /* Mantém o tamanho real de cada botão na linha */
   }
   
-  /* Libera o container para crescer infinitamente para baixo */
+  /* Ajusta o container do conteúdo principal abaixo do menu */
   .main-content-container { 
-    padding: 16px; 
+    padding: 16px !important; 
+    width: 100% !important;
+    max-width: 100% !important;
     height: auto !important;
-    min-height: auto;
+  }
+
+  /* Força a tela de OS visível a resetar qualquer espaçamento herdado */
+  .view-container.active {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    height: auto !important;
+  }
+
+  /* Corrige a linha do título e o botão de "+" para não quebrarem o layout */
+  .header-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin-bottom: 16px !important;
+  }
+
+  .h1 {
+    font-size: 20px !important; /* Reduz um pouco o tamanho no celular */
+  }
+
+  /* Faz as abas de filtro ocuparem a largura total e permitirem arrastar para o lado */
+  .filters-container {
+    display: flex !important;
+    gap: 6px !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    padding-bottom: 8px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .f-chip {
+    white-space: nowrap !important;
+    flex: 0 0 auto !important;
   }
   
-  /* Modifica os cards do painel de 2 colunas para 1 coluna vertical empilhada */
+  /* Remove as barras de rolagem nativas para um visual mais limpo */
+  .filters-container::-webkit-scrollbar {
+    display: none !important;
+  }
+  
+  /* Outros ajustes de cards para o restante das telas */
   .panel-row-container { 
-    grid-template-columns: 1fr; 
-    gap: 16px;
+    grid-template-columns: 1fr !important; 
+    gap: 16px !important;
   }
 
-  /* Faz com que o grid de KPIs distribua em 2 colunas no celular */
   .grid-kpi {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
   }
   
-  /* Reajusta os cards de Ordem de Serviço */
   .os-card { 
-    flex-direction: column; 
-    align-items: stretch; 
-    gap: 12px; 
+    flex-direction: column !important; 
+    align-items: stretch !important; 
+    gap: 12px !important; 
   }
   
-  .os-num { 
-    width: auto; 
-  }
-  
-  .os-actions { 
-    justify-content: space-between; 
-  }
-  
-  /* O Drawer passa a ocupar a tela inteira de forma confortável */
-  .drawer-container { 
-    width: 100%; 
-  }
-
-  /* Evita que o gráfico mensal esmague no mobile */
-  .chart-w {
-    overflow-x: auto;
-    padding-bottom: 8px;
-    justify-content: flex-start;
-    gap: 8px;
-  }
-  
-  .month-col {
-    flex: 0 0 45px;
-  }
+  .os-num { width: auto !important; }
+  .os-actions { justify-content: space-between !important; }
+  .drawer-container { width: 100% !important; }
 }
