@@ -29,6 +29,7 @@ body {
   font-family: 'Segoe UI', system-ui, sans-serif;
   font-size: 14px;
   min-height: 100vh;
+  overflow-x: hidden; /* Evita quebra de tela para os lados */
 }
 
 /* Containers Estruturais Principais */
@@ -52,10 +53,12 @@ body {
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
+  min-height: 100vh;
 }
 
 .view-container {
   display: none;
+  height: auto !important; /* Força o container a esticar com o conteúdo */
 }
 
 .view-container.active {
@@ -110,6 +113,7 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  gap: 12px;
 }
 
 .h1 {
@@ -170,6 +174,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  height: auto !important; /* Impede que os cards fiquem travados na vertical */
 }
 
 .card-h {
@@ -299,6 +304,8 @@ body {
   display: flex;
   gap: 6px;
   margin-bottom: 16px;
+  overflow-x: auto; /* Permite arrastar pro lado no celular se tiver muito filtro */
+  padding-bottom: 4px;
 }
 
 .f-chip {
@@ -311,6 +318,7 @@ body {
   color: var(--muted);
   cursor: pointer;
   transition: all 0.15s;
+  white-space: nowrap; /* Não quebra linha no botão */
 }
 
 .f-chip:hover {
@@ -862,14 +870,69 @@ textarea {
   margin-bottom: 8px;
 }
 
-/* Responsividade Mobile (Containers colapsáveis) */
+/* ==========================================
+   Responsividade Mobile Modificada e Corrigida
+   ========================================== */
 @media(max-width: 768px) {
-  .app-container { grid-template-columns: 1fr; }
-  .sidebar-container { display: none; }
-  .main-content-container { padding: 16px; }
-  .panel-row-container { grid-template-columns: 1fr; }
-  .os-card { flex-direction: column; align-items: stretch; gap: 12px; }
-  .os-num { width: auto; }
-  .os-actions { justify-content: space-between; }
-  .drawer-container { width: 100%; }
+  /* Altera para uma única coluna, mas garante fluxo livre para rolagem vertical */
+  .app-container { 
+    grid-template-columns: 1fr; 
+    height: auto !important;
+  }
+  
+  /* Mantém a sidebar oculta temporariamente, mas ajusta o container principal */
+  .sidebar-container { 
+    display: none; 
+  }
+  
+  /* Libera o container para crescer infinitamente para baixo */
+  .main-content-container { 
+    padding: 16px; 
+    height: auto !important;
+    min-height: auto;
+  }
+  
+  /* Modifica de 2 colunas para 1 coluna vertical empilhada */
+  .panel-row-container { 
+    grid-template-columns: 1fr; 
+    gap: 16px;
+  }
+
+  /* Faz com que o grid de KPIs distribua em 2 colunas no celular em vez de quebrar ou sumir */
+  .grid-kpi {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  /* Reajusta os cards de Ordem de Serviço */
+  .os-card { 
+    flex-direction: column; 
+    align-items: stretch; 
+    gap: 12px; 
+  }
+  
+  .os-num { 
+    width: auto; 
+  }
+  
+  .os-actions { 
+    justify-content: space-between; 
+  }
+  
+  /* O Drawer (Menu de cadastro lateral) passa a ocupar a tela inteira de forma confortável */
+  .drawer-container { 
+    width: 100%; 
+  }
+
+  /* Evita que o gráfico mensal de colunas quebre ou esmague no mobile */
+  .chart-w {
+    overflow-x: auto;
+    padding-bottom: 8px;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+  
+  .month-col {
+    flex: 0 0 45px; /* Define largura fixa mínima para cada barra no celular */
+  }
 }
