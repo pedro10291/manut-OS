@@ -871,18 +871,48 @@ textarea {
 }
 
 /* ==========================================
-   Responsividade Mobile Modificada e Corrigida
+   Responsividade Mobile Corrigida (Com Menu)
    ========================================== */
 @media(max-width: 768px) {
-  /* Altera para uma única coluna, mas garante fluxo livre para rolagem vertical */
+  /* Muda de duas colunas para uma coluna vertical (Menu em cima, Conteúdo embaixo) */
   .app-container { 
     grid-template-columns: 1fr; 
     height: auto !important;
   }
   
-  /* Mantém a sidebar oculta temporariamente, mas ajusta o container principal */
+  /* Em vez de esconder (display: none), transforma a barra lateral em um menu de topo */
   .sidebar-container { 
-    display: none; 
+    display: flex; 
+    flex-direction: column; /* Alinha o Logo e os Botões verticalmente no topo */
+    gap: 12px;
+    padding: 16px;
+    border-right: none;
+    border-bottom: 1px solid var(--border); /* Linha divisória embaixo do menu */
+    background: var(--surface);
+    width: 100%;
+  }
+
+  /* Faz os botões ficarem lado a lado na horizontal */
+  .nav-menu {
+    flex-direction: row;
+    gap: 6px;
+    width: 100%;
+    overflow-x: auto; /* Se a tela for muito pequena, permite deslizar os botões pro lado */
+    padding-bottom: 4px;
+    scrollbar-width: none; /* Remove barra de rolagem visual no Firefox */
+  }
+  
+  .nav-menu::-webkit-scrollbar {
+    display: none; /* Remove barra de rolagem visual no Chrome/Safari */
+  }
+
+  /* Ajusta o tamanho dos botões para caberem lado a lado */
+  .nav-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+    white-space: nowrap; /* Impede o texto do botão de quebrar linha */
+    flex: 1;
+    justify-content: center;
   }
   
   /* Libera o container para crescer infinitamente para baixo */
@@ -892,13 +922,13 @@ textarea {
     min-height: auto;
   }
   
-  /* Modifica de 2 colunas para 1 coluna vertical empilhada */
+  /* Modifica os cards do painel de 2 colunas para 1 coluna vertical empilhada */
   .panel-row-container { 
     grid-template-columns: 1fr; 
     gap: 16px;
   }
 
-  /* Faz com que o grid de KPIs distribua em 2 colunas no celular em vez de quebrar ou sumir */
+  /* Faz com que o grid de KPIs distribua em 2 colunas no celular */
   .grid-kpi {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
@@ -919,12 +949,12 @@ textarea {
     justify-content: space-between; 
   }
   
-  /* O Drawer (Menu de cadastro lateral) passa a ocupar a tela inteira de forma confortável */
+  /* O Drawer passa a ocupar a tela inteira de forma confortável */
   .drawer-container { 
     width: 100%; 
   }
 
-  /* Evita que o gráfico mensal de colunas quebre ou esmague no mobile */
+  /* Evita que o gráfico mensal esmague no mobile */
   .chart-w {
     overflow-x: auto;
     padding-bottom: 8px;
@@ -933,6 +963,6 @@ textarea {
   }
   
   .month-col {
-    flex: 0 0 45px; /* Define largura fixa mínima para cada barra no celular */
+    flex: 0 0 45px;
   }
 }
