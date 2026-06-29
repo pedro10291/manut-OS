@@ -1,11 +1,13 @@
 import { database } from "./firebase.js";
 const KEY = 'os_sys_v1';
-let db = JSON.parse(localStorage.getItem(KEY) || '[]');
+let db = [];
 let curFilter = 'all';
 let curStatus = 'aberto';
 let curTec = null;
 let editId = null;
 let curView = 'painel';
+
+
 
 // 1. ADICIONADO O CAMPO 'phone' FORMATADO PARA CADA TÉCNICO
 const TEC = {
@@ -114,16 +116,29 @@ function saveOS() {
     tec: curTec,
     status: curStatus
   };
+
   if (editId) {
     const idx = db.findIndex(x => x.id === editId);
     db[idx] = { ...db[idx], ...data };
+    save(editId, db[idx]);   // ✅ salva a OS editada no Firebase
     toast('OS atualizada');
   } else {
-    db.push({ id: 'os_' + Date.now(), ...data, sigTec: null, sigSol: null, sigAcomp: null, pecas: [], iniciada: null, concluida: null, tag: '', descEquipamento: '', acoesSsma: '', ssma: { q1: null, q2: null, q3: null } });
+    const novaOS = {
+      id: 'os_' + Date.now(),
+      ...data,
+      sigTec: null, sigSol: null, sigAcomp: null,
+      pecas: [], iniciada: null, concluida: null,
+      tag: '', descEquipamento: '', acoesSsma: '',
+      ssma: { q1: null, q2: null, q3: null }
+    };
+    db.push(novaOS);
+    save(novaOS.id, novaOS);  // ✅ salva a nova OS no Firebase
     toast('OS criada');
   }
-  save(); closeDrawer();
-  renderPainel(); renderOSList();
+
+  closeDrawer();
+  renderPainel();
+  renderOSList();
 }
 
 function renderPainel() {
