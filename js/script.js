@@ -21,8 +21,14 @@ const PILL_CLASS = { aberto: 'p-aberto', andamento: 'p-andamento', concluido: 'p
 let ssmaRespostas = { q1: null, q2: null, q3: null };
 let pecas = [];
 
-function save(id, dados) { 
-    set(ref(database, "os/" + id), dados); 
+async function save(id, dados) {
+  try {
+    await set(ref(database, "os/" + id), dados);
+    console.log("✅ Gravou no Firebase");
+  } catch (err) {
+    console.error("❌ Firebase:", err);
+    alert(err.message);
+  }
 }
 
 function toggleSidebar() {
