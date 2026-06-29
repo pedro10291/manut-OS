@@ -1,6 +1,31 @@
 import { database } from "./firebase.js";
+import {
+  ref,
+  set,
+  onValue
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 const KEY = 'os_sys_v1';
 let db = [];
+onValue(ref(database, "os"), (snapshot) => {
+    const dados = snapshot.val();
+
+    if (dados) {
+        db = Object.values(dados);
+    } else {
+        db = [];
+    }
+
+    console.log("Banco sincronizado:", db);
+
+    renderPainel();
+    renderOSList();
+    renderTecSelect();
+
+    const select = document.getElementById("tec-os-select");
+    if (select && select.value) {
+        renderTecPage(select.value);
+    }
+});
 let curFilter = 'all';
 let curStatus = 'aberto';
 let curTec = null;
@@ -22,13 +47,13 @@ let ssmaRespostas = { q1: null, q2: null, q3: null };
 let pecas = [];
 
 async function save(id, dados) {
-  try {
-    await set(ref(database, "os/" + id), dados);
-    console.log("✅ Gravou no Firebase");
-  } catch (err) {
-    console.error("❌ Firebase:", err);
-    alert(err.message);
-  }
+    try {
+        await set(ref(database, "os/" + id), dados);
+        console.log("OS salva:", id);
+    } catch (e) {
+        console.error("Erro ao salvar:", e);
+        alert(e.message);
+    }
 }
 
 function toggleSidebar() {
@@ -571,8 +596,10 @@ function fmtDate(d) { if (!d) return '—'; try { return new Date(d + 'T12:00').
 function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
 
 window.onload = () => {
-  document.getElementById('f-data').value = new Date().toISOString().slice(0, 10);
-  renderPainel();
+    document.getElementById("f-data").value =
+        new Date().toISOString().slice(0, 10);
+
+    renderTecSelect();
 };
 window.goView = goView;
 window.toggleSidebar = toggleSidebar;
@@ -591,9 +618,3 @@ window.selStatus = selStatus;
 window.setFilter = setFilter;
 
 
-import { ref, set } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
-set(ref(database, "teste"), {
-  sistema: "Manut OS",
-  conectado: true,
-  data: new Date().toISOString()
-})
