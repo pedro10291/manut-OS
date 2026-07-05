@@ -1,10 +1,59 @@
+import { database } from "./firebase.js";
+import {
+  ref,
+  set,
+  onValue
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 const KEY = 'os_sys_v1';
-let db = JSON.parse(localStorage.getItem(KEY) || '[]');
+let db = [];
+onValue(ref(database, "os"), (snapshot) => {
+
+    const dados = snapshot.val();
+
+    db = dados ? Object.values(dados) : [];
+
+    renderPainel();
+    renderOSList();
+    renderTecSelect();
+
+    abrirOSPeloLink();
+
+});
+function abrirOSPeloLink() {
+
+    const params = new URLSearchParams(window.location.search);
+
+    const osId = params.get("os");
+
+    if (!osId) return;
+
+    const os = db.find(o => o.id === osId);
+
+    if (!os) return;
+
+    goView("tec-link");
+
+    const select = document.getElementById("tec-os-select");
+
+    if (select)
+        select.value = os.id;
+
+    renderTecPage(os.id);
+
+    document.body.classList.add("modo-tecnico");
+
+    document.getElementById("sidebar").style.display = "none";
+
+    document.getElementById("fab").style.display = "none";
+
+}
 let curFilter = 'all';
 let curStatus = 'aberto';
 let curTec = null;
 let editId = null;
 let curView = 'painel';
+
+
 
 // 1. ADICIONADO O CAMPO 'phone' FORMATADO PARA CADA TÉCNICO
 const TEC = {
@@ -18,9 +67,35 @@ const PILL_CLASS = { aberto: 'p-aberto', andamento: 'p-andamento', concluido: 'p
 let ssmaRespostas = { q1: null, q2: null, q3: null };
 let pecas = [];
 
-function save() { localStorage.setItem(KEY, JSON.stringify(db)); }
+async function save(id, dados) {
+    try {
+        await set(ref(database, "os/" + id), dados);
+        console.log("OS salva:", id);
+    } catch (e) {
+        console.error("Erro ao salvar:", e);
+        alert(e.message);
+    }
+}
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+
+  if (sidebar) sidebar.classList.toggle('open');
+  if (overlay) overlay.classList.toggle('show');
+}
+
+function closeSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+
+  if (sidebar) sidebar.classList.remove('open');
+  if (overlay) overlay.classList.remove('show');
+}
 
 function goView(v) {
+    localStorage.setItem('currentView', v);
+  closeSidebar();
   curView = v;
   document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
@@ -93,16 +168,29 @@ function saveOS() {
     tec: curTec,
     status: curStatus
   };
+
   if (editId) {
     const idx = db.findIndex(x => x.id === editId);
     db[idx] = { ...db[idx], ...data };
+    save(editId, db[idx]);   // ✅ salva a OS editada no Firebase
     toast('OS atualizada');
   } else {
-    db.push({ id: 'os_' + Date.now(), ...data, sigTec: null, sigSol: null, sigAcomp: null, pecas: [], iniciada: null, concluida: null, tag: '', descEquipamento: '', acoesSsma: '', ssma: { q1: null, q2: null, q3: null } });
+    const novaOS = {
+      id: 'os_' + Date.now(),
+      ...data,
+      sigTec: null, sigSol: null, sigAcomp: null,
+      pecas: [], iniciada: null, concluida: null,
+      tag: '', descEquipamento: '', acoesSsma: '',
+      ssma: { q1: null, q2: null, q3: null }
+    };
+    db.push(novaOS);
+    save(novaOS.id, novaOS);  // ✅ salva a nova OS no Firebase
     toast('OS criada');
   }
-  save(); closeDrawer();
-  renderPainel(); renderOSList();
+
+  closeDrawer();
+  renderPainel();
+  renderOSList();
 }
 
 function renderPainel() {
@@ -190,20 +278,23 @@ function renderOSList() {
 
 // 2. FUNÇÃO ATUALIZADA PARA ENVIAR MENSAGEM DIRETAMENTE AO TELEFONE DO TÉCNICO ATRIBUÍDO
 function makeWALink(os) {
-  const tecObj = os.tec ? TEC[os.tec] : null;
-  const phone = tecObj?.phone ? tecObj.phone : '';
-  
-  const msg = `*ORDEM DE SERVIÇO — ${os.chamado || 'S/N'}*\n\n` +
-    `*Problema:* ${os.problema}\n` +
-    `*Local:* ${os.area || '—'}\n` +
-    `*Data:* ${fmtDate(os.data)}\n\n` +
-    `Acesse para preencher e assinar:\n${window.location.href}`;
-    
-  if (phone) {
+    const tecObj = os.tec ? TEC[os.tec] : null;
+    const phone = tecObj?.phone || "";
+
+    const link = `${window.location.origin}${window.location.pathname}?os=${os.id}`;
+
+    const msg =
+`📋 *ORDEM DE SERVIÇO ${os.chamado || "S/N"}*
+
+🔧 Problema: ${os.problema}
+📍 Local: ${os.area || "—"}
+📅 Data: ${fmtDate(os.data)}
+
+Clique no link abaixo para abrir esta OS:
+
+${link}`;
+
     return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-  } else {
-    return `https://wa.me/?text=${encodeURIComponent(msg)}`;
-  }
 }
 
 function setFilter(f, btn) {
@@ -241,6 +332,7 @@ function renderTecPage(id) {
   const wrap = document.getElementById('tec-page-wrap');
   wrap.innerHTML = buildTecPage(o);
   initCanvases(id);
+  document.getElementById("tec-os-select").style.display = "none";
   
   if (ssmaRespostas.q1 !== null) setSSMA('q1', ssmaRespostas.q1);
   if (ssmaRespostas.q2 !== null) setSSMA('q2', ssmaRespostas.q2);
@@ -293,14 +385,26 @@ function buildTecPage(o) {
       </div>
     </section>
 
-    <section class="tec-section">
-      <div class="tec-section-title">Tempos de Execução</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div class="field"><label>Início do Conserto</label><input type="datetime-local" id="tec-inicio" value="${o.iniciada || ''}"></div>
-        <div class="field"><label>Fim do Conserto</label><input type="datetime-local" id="tec-fim" value="${o.concluida || ''}"></div>
-      </div>
-      <div class="field"><label>Relatório Técnico / Serviço Realizado</label><textarea id="tec-servico" placeholder="Descreva lo que foi feito com detalhes...">${o.servicoRealizado || ''}</textarea></div>
-    </section>
+<section class="tec-section">
+  <div class="tec-section-title">Tempos de Execução</div>
+
+  <div class="tempo-grid">
+    <div class="field">
+      <label>Início do Conserto</label>
+      <input type="datetime-local" id="tec-inicio" value="2026-06-16T09:13">
+    </div>
+
+    <div class="field">
+      <label>Fim do Conserto</label>
+      <input type="datetime-local" id="tec-fim" value="2026-06-30T09:14">
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Relatório Técnico / Serviço Realizado</label>
+    <textarea id="tec-servico" placeholder="Descreva o que foi feito com detalhes..."></textarea>
+  </div>
+</section>
 
     <section class="tec-section">
       <div class="tec-section-title">Peças Utilizadas</div>
@@ -405,7 +509,7 @@ function confirmarOS(id) {
   
   os.ssma = { ...ssmaRespostas };
   if (os.sigTec || os.sigSol) os.status = 'assinando';
-  save();
+  save(os.id, os);
   toast('Dados operacionais e segurança salvos! ✔');
   renderOSList();
 }
@@ -516,7 +620,38 @@ function gerarPDF(id) {
 function fmtDate(d) { if (!d) return '—'; try { return new Date(d + 'T12:00').toLocaleDateString('pt-BR'); } catch { return d; } }
 function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
 
-window.onload = () => {
-  document.getElementById('f-data').value = new Date().toISOString().slice(0, 10);
-  renderPainel();
-};
+const params = new URLSearchParams(window.location.search);
+const osId = params.get("os");
+
+if (osId) {
+
+    const esperar = setInterval(() => {
+
+        const os = db.find(o => o.id === osId);
+
+        if (!os) return;
+
+        clearInterval(esperar);
+
+        renderTecPage(os.id);
+
+    },100);
+
+}
+window.goView = goView;
+window.toggleSidebar = toggleSidebar;
+window.closeSidebar = closeSidebar;
+window.renderTecPage = renderTecPage;
+window.setSSMA = setSSMA;
+window.clearSig = clearSig;
+window.addPeca = addPeca;
+window.confirmarOS = confirmarOS;
+window.gerarPDF = gerarPDF;
+window.openDrawer = openDrawer;
+window.closeDrawer = closeDrawer;
+window.saveOS = saveOS;
+window.selTec = selTec;
+window.selStatus = selStatus;
+window.setFilter = setFilter;
+
+

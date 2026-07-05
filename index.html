@@ -6,12 +6,13 @@
   <title>Sistema OS — Manutenção</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <link rel="stylesheet" href="css/style.css">
+
 </head>
 <body>
 
   <div class="app-container">
     
-    <aside class="sidebar-container">
+    <aside class="sidebar-container" id="sidebar">
       <div class="logo">⚙ Manutenção</div>
       <nav class="nav-menu">
         <button class="nav-btn active" id="nav-painel" onclick="goView('painel')">📊 Painel Geral</button>
@@ -20,7 +21,11 @@
       </nav>
     </aside>
 
-    <main class="main-content-container">
+<main class="main-content-container">
+
+      <button class="menu-toggle" onclick="toggleSidebar()">
+        ☰
+      </button>
       
       <section class="view-container active" id="view-painel">
         <header class="header-row">
@@ -81,7 +86,7 @@
           </div>
         </div>
         
-        <div id="tec-page-wrap" class="tec-simulation-container">
+        <div id="tec-page-wrap">
           <div class="empty">
             <div class="empty-icon">📱</div>
             <p>Selecione uma OS acima para abrir a tela de fechamento do técnico.</p>
@@ -153,6 +158,6 @@
 
   <div id="toast"></div>
 
-  <script src="js/script.js"></script>
+  <script type="module" src="js/script.js"></script>
 </body>
 </html>
