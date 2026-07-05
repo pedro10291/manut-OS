@@ -2,21 +2,37 @@ import { database } from "./firebase.js";
 import {
   ref,
   set,
+<<<<<<< HEAD
   remove,
+=======
+>>>>>>> ec6be51699b34906c35b96a549c58e87d11fbd2f
   onValue
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 const KEY = 'os_sys_v1';
 let db = [];
 onValue(ref(database, "os"), (snapshot) => {
+<<<<<<< HEAD
 
     const dados = snapshot.val();
 
     db = dados ? Object.values(dados) : [];
+=======
+    const dados = snapshot.val();
+
+    if (dados) {
+        db = Object.values(dados);
+    } else {
+        db = [];
+    }
+
+    console.log("Banco sincronizado:", db);
+>>>>>>> ec6be51699b34906c35b96a549c58e87d11fbd2f
 
     renderPainel();
     renderOSList();
     renderTecSelect();
 
+<<<<<<< HEAD
     abrirOSPeloLink();
 
 });
@@ -48,6 +64,13 @@ function abrirOSPeloLink() {
     document.getElementById("fab").style.display = "none";
 
 }
+=======
+    const select = document.getElementById("tec-os-select");
+    if (select && select.value) {
+        renderTecPage(select.value);
+    }
+});
+>>>>>>> ec6be51699b34906c35b96a549c58e87d11fbd2f
 let curFilter = 'all';
 let curStatus = 'aberto';
 let curTec = null;
@@ -77,6 +100,7 @@ async function save(id, dados) {
         alert(e.message);
     }
 }
+<<<<<<< HEAD
 async function deleteOS(id) {
   const os = db.find(x => x.id === id);
   if (!os) return;
@@ -94,6 +118,8 @@ async function deleteOS(id) {
     alert(e.message);
   }
 }
+=======
+>>>>>>> ec6be51699b34906c35b96a549c58e87d11fbd2f
 
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
@@ -110,6 +136,7 @@ function closeSidebar() {
   if (sidebar) sidebar.classList.remove('open');
   if (overlay) overlay.classList.remove('show');
 }
+<<<<<<< HEAD
 
 document.addEventListener('click', (e) => {
   const sidebar = document.getElementById('sidebar');
@@ -124,6 +151,8 @@ document.addEventListener('click', (e) => {
     closeSidebar();
   }
 });
+=======
+>>>>>>> ec6be51699b34906c35b96a549c58e87d11fbd2f
 
 function goView(v) {
     localStorage.setItem('currentView', v);
@@ -424,16 +453,27 @@ function buildTecPage(o) {
   <div class="tempo-grid">
     <div class="field">
       <label>Início do Conserto</label>
+<<<<<<< HEAD
       <input type="datetime-local" id="tec-inicio" value="${o.iniciada || ''}">
+=======
+      <input type="datetime-local" id="tec-inicio" value="2026-06-16T09:13">
+>>>>>>> ec6be51699b34906c35b96a549c58e87d11fbd2f
     </div>
 
     <div class="field">
       <label>Fim do Conserto</label>
+<<<<<<< HEAD
       <input type="datetime-local" id="tec-fim" value="${o.concluida || ''}">
     </div>
   </div>
   ...
 </section>
+=======
+      <input type="datetime-local" id="tec-fim" value="2026-06-30T09:14">
+    </div>
+  </div>
+
+>>>>>>> ec6be51699b34906c35b96a549c58e87d11fbd2f
   <div class="field">
     <label>Relatório Técnico / Serviço Realizado</label>
     <textarea id="tec-servico" placeholder="Descreva o que foi feito com detalhes..."></textarea>
@@ -654,6 +694,7 @@ function gerarPDF(id) {
 function fmtDate(d) { if (!d) return '—'; try { return new Date(d + 'T12:00').toLocaleDateString('pt-BR'); } catch { return d; } }
 function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
 
+<<<<<<< HEAD
 const params = new URLSearchParams(window.location.search);
 const osId = params.get("os");
 
@@ -672,6 +713,14 @@ if (osId) {
     },100);
 
 }
+=======
+window.onload = () => {
+    document.getElementById("f-data").value =
+        new Date().toISOString().slice(0, 10);
+
+    renderTecSelect();
+};
+>>>>>>> ec6be51699b34906c35b96a549c58e87d11fbd2f
 window.goView = goView;
 window.toggleSidebar = toggleSidebar;
 window.closeSidebar = closeSidebar;
@@ -687,5 +736,9 @@ window.saveOS = saveOS;
 window.selTec = selTec;
 window.selStatus = selStatus;
 window.setFilter = setFilter;
+<<<<<<< HEAD
 window.deleteOS = deleteOS;
+=======
+
+>>>>>>> ec6be51699b34906c35b96a549c58e87d11fbd2f
 

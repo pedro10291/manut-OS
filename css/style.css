@@ -892,6 +892,7 @@ textarea {
   grid-template-columns:1fr 1fr;
   gap:8px;
 }
+<<<<<<< HEAD
 body.modo-tecnico .app-container{
   display:block; /* ou grid-template-columns: 1fr; */
 }
@@ -1143,3 +1144,212 @@ body.modo-tecnico .simulation-selector-container{
     }
 
 
+=======
+@media(max-width:768px){
+
+  /* MENU MOBILE */
+  .menu-toggle {
+    display:block;
+  }
+
+  .app-container {
+    grid-template-columns:1fr;
+    width:100%;
+    overflow-x:hidden;
+  }
+
+  .sidebar-container {
+    position:fixed;
+    top:0;
+    left:0;
+    width:260px;
+    height:100vh;
+    transform:translateX(-100%);
+    transition:transform .3s ease;
+    z-index:130;
+    display:flex;
+    box-shadow:5px 0 20px rgba(0,0,0,.15);
+  }
+
+  .sidebar-container.open {
+    transform:translateX(0);
+  }
+
+
+  /* CONTEÚDO PRINCIPAL */
+  .main-content-container {
+    padding:16px;
+    width:100%;
+    max-width:100%;
+    overflow-x:hidden;
+  }
+
+
+  /* CABEÇALHOS */
+  .header-row {
+    flex-wrap:wrap;
+    gap:12px;
+    margin-bottom:16px;
+  }
+
+  .h1 {
+    font-size:20px;
+  }
+
+
+  /* DASHBOARD */
+  .panel-row-container {
+    grid-template-columns:1fr;
+  }
+
+  .grid-kpi {
+    grid-template-columns:1fr;
+  }
+
+  .panel-card {
+    padding:16px;
+  }
+
+
+  /* ORDENS DE SERVIÇO */
+  .os-card {
+    flex-direction:column;
+    align-items:stretch;
+    gap:14px;
+    padding:16px;
+  }
+
+  .os-num {
+    width:auto;
+  }
+
+  .os-info {
+    width:100%;
+  }
+
+  .os-desc {
+    white-space:normal;
+    overflow:visible;
+    text-overflow:unset;
+    line-height:1.3;
+  }
+
+  .os-meta {
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+
+  .os-actions {
+    width:100%;
+    justify-content:flex-start;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+
+  /* FILTROS */
+  .filters-container {
+    width:100%;
+    overflow-x:auto;
+    flex-wrap:nowrap;
+    padding-bottom:6px;
+  }
+
+  .f-chip {
+    flex-shrink:0;
+  }
+
+
+  /* DRAWER NOVA OS */
+  .drawer-container {
+    width:100%;
+    max-width:100%;
+    right:0;
+  }
+
+  .drawer-h {
+    padding:16px;
+  }
+
+  .drawer-b {
+    padding:16px;
+    overflow-y:auto;
+  }
+
+  .drawer-f {
+    padding:12px;
+  }
+
+
+  /* FORMULÁRIOS */
+  .form-row-2col {
+    grid-template-columns:1fr;
+  }
+
+
+  /* SELEÇÃO DE TÉCNICOS */
+  .tec-grid {
+    grid-template-columns:repeat(2,1fr);
+  }
+
+
+  /* STATUS */
+  .status-row {
+    flex-wrap:wrap;
+  }
+
+  .st {
+    min-width:50%;
+  }
+
+
+  /* PÁGINA DO TÉCNICO */
+  .tec-page {
+    width:100%;
+    max-width:100%;
+    padding:16px;
+  }
+
+  .tec-header {
+    width:100%;
+  }
+
+
+  /* PEÇAS */
+  .peca-row {
+    grid-template-columns:60px 1fr 45px 30px;
+  }
+
+
+  /* ASSINATURA */
+  .sig-wrap {
+    width:100%;
+    height:120px;
+  }
+
+.sig-canvas {
+  width: 100%;
+  height: 100%;
+  touch-action: none; 
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+
+  /* GRÁFICOS */
+  .chart-w {
+    overflow-x:auto;
+  }
+
+
+  /* BOTÕES */
+  .btn {
+    max-width:100%;
+  }
+  .tempo-grid {
+  grid-template-columns:1fr;
+}
+
+}
+>>>>>>> ec6be51699b34906c35b96a549c58e87d11fbd2f
