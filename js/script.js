@@ -2,6 +2,7 @@ import { database } from "./firebase.js";
 import {
   ref,
   set,
+  remove,
   onValue
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 const KEY = 'os_sys_v1';
@@ -76,6 +77,23 @@ async function save(id, dados) {
         alert(e.message);
     }
 }
+async function deleteOS(id) {
+  const os = db.find(x => x.id === id);
+  if (!os) return;
+
+  const confirmado = confirm(`Excluir a OS ${os.chamado || os.id}? Essa ação não pode ser desfeita.`);
+  if (!confirmado) return;
+
+  try {
+    await remove(ref(database, "os/" + id));
+    toast('OS excluída');
+    // não precisa mexer no array "db" manualmente:
+    // o onValue já vai disparar e re-renderizar tudo sozinho
+  } catch (e) {
+    console.error("Erro ao excluir:", e);
+    alert(e.message);
+  }
+}
 
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
@@ -92,6 +110,20 @@ function closeSidebar() {
   if (sidebar) sidebar.classList.remove('open');
   if (overlay) overlay.classList.remove('show');
 }
+
+document.addEventListener('click', (e) => {
+  const sidebar = document.getElementById('sidebar');
+  const toggleBtn = document.querySelector('.menu-toggle');
+
+  if (!sidebar || !sidebar.classList.contains('open')) return;
+
+  const clicouDentroSidebar = sidebar.contains(e.target);
+  const clicouNoBotao = toggleBtn && toggleBtn.contains(e.target);
+
+  if (!clicouDentroSidebar && !clicouNoBotao) {
+    closeSidebar();
+  }
+});
 
 function goView(v) {
     localStorage.setItem('currentView', v);
@@ -268,10 +300,11 @@ function renderOSList() {
         </div>
       </div>
       <div class="os-actions" onclick="event.stopPropagation()">
-        <span class="pill ${PILL_CLASS[o.status]}">${STATUS_LABEL[o.status]}</span>
-        ${o.tec ? `<a href="${waLink}" target="_blank" style="text-decoration:none"><button class="btn btn-sm" style="background:#25D366;color:#fff;border:none">📲 WA</button></a>` : ''}
-        <button class="btn btn-sm btn-primary" onclick="gerarPDF('${o.id}')">📄 PDF</button>
-      </div>
+  <span class="pill ${PILL_CLASS[o.status]}">${STATUS_LABEL[o.status]}</span>
+  ${o.tec ? `<a href="${waLink}" target="_blank" style="text-decoration:none"><button class="btn btn-sm" style="background:#25D366;color:#fff;border:none">📲 WA</button></a>` : ''}
+  <button class="btn btn-sm btn-primary" onclick="gerarPDF('${o.id}')">📄 PDF</button>
+  <button class="btn btn-sm" style="background:var(--red-light);color:var(--red);border-color:var(--red)" onclick="deleteOS('${o.id}')">🗑</button>
+</div>
     </div>`;
   }).join('');
 }
@@ -391,15 +424,16 @@ function buildTecPage(o) {
   <div class="tempo-grid">
     <div class="field">
       <label>Início do Conserto</label>
-      <input type="datetime-local" id="tec-inicio" value="2026-06-16T09:13">
+      <input type="datetime-local" id="tec-inicio" value="${o.iniciada || ''}">
     </div>
 
     <div class="field">
       <label>Fim do Conserto</label>
-      <input type="datetime-local" id="tec-fim" value="2026-06-30T09:14">
+      <input type="datetime-local" id="tec-fim" value="${o.concluida || ''}">
     </div>
   </div>
-
+  ...
+</section>
   <div class="field">
     <label>Relatório Técnico / Serviço Realizado</label>
     <textarea id="tec-servico" placeholder="Descreva o que foi feito com detalhes..."></textarea>
@@ -653,5 +687,5 @@ window.saveOS = saveOS;
 window.selTec = selTec;
 window.selStatus = selStatus;
 window.setFilter = setFilter;
-
+window.deleteOS = deleteOS;
 

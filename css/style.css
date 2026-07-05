@@ -224,6 +224,7 @@ body {
 
 .rank-name {
   flex: 1;
+  min-width: 0;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -256,7 +257,7 @@ body {
   display: flex;
   justify-content: space-around;
   align-items: flex-end;
-  height: 100px;
+  min-width: 116px;
   padding-top: 16px;
 }
 
@@ -942,6 +943,10 @@ body.modo-tecnico .simulation-selector-container{
     width:100%;
     max-width:100%;
     overflow-x:hidden;
+  }
+
+  .rank-bar-w {
+     width: 70px; 
   }
 
 
