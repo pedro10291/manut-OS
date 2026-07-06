@@ -328,8 +328,18 @@ async function fecharOperacaoTecnico(id) {
       toast('Validação do técnico efetuada! ✔');
       alert('Relatório técnico salvo com sucesso! Encaminhe o link para o solicitante efetuar o Aceite via aparelho.');
       
-      const waLinkParaSolicitante = makeWALink(os, 'solicitante');
-      window.open(waLinkParaSolicitante, '_blank');
+const link = `${window.location.origin}${window.location.pathname}?os=${os.id}&role=solicitante`;
+
+const texto =
+`🔔 *Solicitação de Aceite*
+
+O serviço foi concluído.
+
+Abra o link abaixo para validar a execução:
+
+${link}`;
+
+window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, "_blank");
       renderTecPage(os.id, papelAtual);
       return;
   }
