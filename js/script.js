@@ -555,31 +555,103 @@ function gerarPDF(id) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const W = 210, M = 12, cw = W - M * 2;
 
-  function cell(x, y, w, h, text, opts = {}) {
-    if (opts.fill) doc.setFillColor(...(opts.fill));
-    doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.2);
-    if (opts.fill) doc.rect(x, y, w, h, 'FD'); else doc.rect(x, y, w, h, 'S');
-    if (text !== undefined && text !== null && text !== '') {
-      doc.setFontSize(opts.fs || 8); doc.setFont('helvetica', opts.bold ? 'bold' : 'normal');
-      doc.setTextColor(...(opts.tc || [30, 30, 30]));
-      const align = opts.align || 'left';
-      const tx = align === 'center' ? x + w / 2 : align === 'right' ? x + w - 2 : x + 2;
-      doc.text(String(text), tx, y + h / 2 + (opts.fs / 2 * 0.35), { align, baseline: 'middle', maxWidth: w - 4 });
-    }
+function cell(x, y, w, h, text, opts = {}) {
+
+  if (opts.fill) doc.setFillColor(...opts.fill);
+
+  doc.setDrawColor(180, 180, 180);
+  doc.setLineWidth(0.2);
+
+  doc.rect(x, y, w, h, opts.fill ? 'FD' : 'S');
+
+  if (text === undefined || text === null || text === '') return;
+
+  const fs = opts.fs || 8;
+
+  doc.setFont('helvetica', opts.bold ? 'bold' : 'normal');
+  doc.setFontSize(fs);
+  doc.setTextColor(...(opts.tc || [30,30,30]));
+
+  const align = opts.align || 'left';
+
+  // posição horizontal
+  let tx;
+  switch (align) {
+    case 'center':
+      tx = x + w / 2;
+      break;
+
+    case 'right':
+      tx = x + w - 2;
+      break;
+
+    default:
+      tx = x + 2;
   }
-  function hdr(x, y, w, h, text) { cell(x, y, w, h, text, { fill: [26, 68, 128], tc: [255, 255, 255], bold: true, fs: 8, align: 'center' }); }
+
+  // altura REAL do texto
+  const dim = doc.getTextDimensions(String(text));
+
+  // posição vertical perfeitamente centralizada
+  const ty = y + (h + dim.h) / 2 - 0.25;
+
+  doc.text(String(text), tx, ty, {
+    align,
+    maxWidth: w - 4
+  });
+}
+  function hdr(x, y, w, h, text) {
+  cell(x, y, w, h, text, {
+    fill: [26,68,128],
+    tc: [255,255,255],
+    bold: true,
+    fs: 8,
+    align: 'center'
+  });
+}
   function lbl(x, y, w, h, text) { cell(x, y, w, h, text, { fill: [235, 240, 248], tc: [26, 68, 128], bold: true, fs: 7.5 }); }
   function val(x, y, w, h, text) { cell(x, y, w, h, text, { fs: 8 }); }
 
-  let y = M;
-  hdr(M, y, cw, 8, 'ORDEM DE SERVIÇO — F-ZZ-181B-0020'); y += 8;
-  lbl(M, y, 30, 6, 'N° OS / Chamado'); val(M + 30, y, 40, 6, os.chamado || '—');
-  lbl(M + 70, y, 30, 6, 'Tipo de Serviço'); val(M + 100, y, 40, 6, 'CORRETIVA');
-  lbl(M + 140, y, 22, 6, 'Especialidade'); val(M + 162, y, cw - 150, 6, os.esp || '—'); y += 6;
-  lbl(M, y, 30, 6, 'Data de Abertura'); val(M + 30, y, 40, 6, fmtDate(os.data));
-  lbl(M + 70, y, 30, 6, 'Solicitante'); val(M + 100, y, cw - 100, 6, os.solicitante || '—'); y += 6;
-  lbl(M, y, 30, 6, 'Local / Área'); val(M + 30, y, cw - 30, 6, os.area || '—'); y += 6;
-  lbl(M, y, 30, 6, 'Técnico'); val(M + 30, y, cw - 30, 6, os.tec ? TEC[os.tec].label : '—'); y += 8;
+ let y = M;
+
+hdr(M, y, cw, 8, 'ORDEM DE SERVIÇO — F-ZZ-181B-0020');
+y += 8;
+
+// ===== Linha 1 =====
+lbl(M, y, 30, 6, 'N° OS / Chamado');
+val(M + 30, y, 35, 6, os.chamado || '—');
+
+lbl(M + 65, y, 30, 6, 'Tipo de Serviço');
+val(M + 95, y, cw - 95, 6, 'CORRETIVA');
+
+y += 6;
+
+// ===== Linha 2 =====
+lbl(M, y, 30, 6, 'Data de Abertura');
+val(M + 30, y, 35, 6, fmtDate(os.data));
+
+lbl(M + 65, y, 30, 6, 'Especialidade');
+val(M + 95, y, cw - 95, 6, os.esp || '—');
+
+y += 6;
+
+// ===== Linha 3 =====
+lbl(M, y, 30, 6, 'Solicitante');
+val(M + 30, y, cw - 30, 6, os.solicitante || '—');
+
+y += 6;
+
+// ===== Linha 4 =====
+lbl(M, y, 30, 6, 'Local / Área');
+val(M + 30, y, cw - 30, 6, os.area || '—');
+
+y += 6;
+
+// ===== Linha 5 =====
+lbl(M, y, 30, 6, 'Técnico');
+val(M + 30, y, cw - 30, 6, os.tec ? TEC[os.tec].label : '—');
+
+y += 8;
 
   hdr(M, y, cw, 6, 'TAG: Descrição do Equipamento'); y += 6;
   lbl(M, y, 20, 7, 'TAG:'); val(M + 20, y, 45, 7, os.tag || '—');
@@ -617,12 +689,22 @@ function gerarPDF(id) {
   const srH = Math.max(12, srLines.length * 4 + 4); cell(M, y, cw, srH, '');
   doc.text(srLines, M + 2, y + 4); y += srH;
 
-  hdr(M, y, cw, 6, 'Tempos de Execução e Ocorrência'); y += 6;
-  const cW1 = 46, cW2 = 35, cW3 = 35, cW4 = 35, cW5 = 35;
-  lbl(M, y, cW1, 5, 'Etapa'); lbl(M + cW1, y, cW2, 5, 'Data'); lbl(M + cW1 + cW2, y, cW3, 5, 'Hora'); lbl(M + cW1 + cW2 + cW3, y, cW4, 5, 'Data'); lbl(M + cW1 + cW2 + cW3 + cW4, y, cW5, 5, 'Hora'); y += 5;
-  lbl(M, y, cW1, 5, 'Início da Ocorrência'); val(M + cW1, y, cW2, 5, fmtDate(os.data)); val(M + cW1 + cW2, y, cW3, 5, '—'); lbl(M + cW1 + cW2 + cW3, y, cW4, 5, 'Fim Ocorrência'); val(M + cW1 + cW2 + cW3 + cW4, y, cW5, 5, '—'); y += 5;
-  lbl(M, y, cW1, 5, 'Início do Conserto'); val(M + cW1, y, cW2, 5, os.iniciada ? os.iniciada.slice(0, 10).split('-').reverse().join('/') : '—'); val(M + cW1 + cW2, y, cW3, 5, os.iniciada ? os.iniciada.slice(11, 16) : '—'); lbl(M + cW1 + cW2 + cW3, y, cW4, 5, 'Fim Conserto'); val(M + cW1 + cW2 + cW3 + cW4, y, cW5, 5, os.concluida ? os.concluida.slice(0, 10).split('-').reverse().join('/') : '—'); y += 5;
-  lbl(M, y, cW1, 5, 'Hora que parou o Equip.'); val(M + cW1, y, cW2, 5, '—'); val(M+cW1+cW2, y, cW3, 5, '—'); lbl(M + cW1 + cW2 + cW3, y, cW4, 5, 'Hora Volt. Equip.'); val(M + cW1 + cW2 + cW3 + cW4, y, cW5, 5, os.concluida ? os.concluida.slice(11, 16) : '—'); y += 7;
+ hdr(M, y, cw, 6, 'Tempos de Execução e Ocorrência'); y += 6;
+const eC1 = 60, eC2 = 63, eC3 = 63;
+lbl(M, y, eC1, 5, 'Etapa'); lbl(M + eC1, y, eC2, 5, 'Data'); lbl(M + eC1 + eC2, y, eC3, 5, 'Hora'); y += 5;
+
+const etapas = [
+  { et: 'Início da Ocorrência', data: fmtDate(os.data), hora: '—' },
+  { et: 'Início do Conserto', data: os.iniciada ? os.iniciada.slice(0, 10).split('-').reverse().join('/') : '—', hora: os.iniciada ? os.iniciada.slice(11, 16) : '—' },
+  { et: 'Fim do Conserto', data: os.concluida ? os.concluida.slice(0, 10).split('-').reverse().join('/') : '—', hora: os.concluida ? os.concluida.slice(11, 16) : '—' },
+];
+etapas.forEach(l => {
+  lbl(M, y, eC1, 5, l.et);
+  val(M + eC1, y, eC2, 5, l.data);
+  val(M + eC1 + eC2, y, eC3, 5, l.hora);
+  y += 5;
+});
+y += 2;
 
   hdr(M, y, cw, 6, 'Materiais e Peças Utilizadas'); y += 6;
   lbl(M, y, 35, 5, 'Código'); lbl(M + 35, y, cw - 60, 5, 'Descrição da Peça / Insumo'); lbl(M + cw - 25, y, 25, 5, 'Quantidade'); y += 5;
