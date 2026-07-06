@@ -5,63 +5,52 @@ import {
   remove,
   onValue
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
 const KEY = 'os_sys_v1';
 let db = [];
+
 onValue(ref(database, "os"), (snapshot) => {
-
     const dados = snapshot.val();
-
     db = dados ? Object.values(dados) : [];
 
     renderPainel();
     renderOSList();
     renderTecSelect();
-
     abrirOSPeloLink();
-
 });
+
 function abrirOSPeloLink() {
-
     const params = new URLSearchParams(window.location.search);
-
     const osId = params.get("os");
-
     if (!osId) return;
 
     const os = db.find(o => o.id === osId);
-
     if (!os) return;
 
     goView("tec-link");
 
     const select = document.getElementById("tec-os-select");
-
-    if (select)
-        select.value = os.id;
+    if (select) select.value = os.id;
 
     renderTecPage(os.id);
 
     document.body.classList.add("modo-tecnico");
-
     document.getElementById("sidebar").style.display = "none";
-
     document.getElementById("fab").style.display = "none";
-
 }
+
 let curFilter = 'all';
 let curStatus = 'aberto';
 let curTec = null;
 let editId = null;
 let curView = 'painel';
 
-
-
-// 1. ADICIONADO O CAMPO 'phone' FORMATADO PARA CADA TÉCNICO
 const TEC = {
   jhonatan: { label: 'Jhonatan', sub: 'Predial', av: 'av-j', initials: 'JH', phone: '5511985070553' },
   jorge: { label: 'Jorge F.', sub: 'Elétrica', av: 'av-jo', initials: 'JO', phone: '5511984610163' },
   hugo: { label: 'Zé Hugo', sub: 'Elétrica', av: 'av-zh', initials: 'ZH', phone: '5511912889240' }
 };
+
 const STATUS_LABEL = { aberto: 'Aberto', andamento: 'Andamento', concluido: 'Concluído', assinando: 'Aguard. assinatura', fechado: 'Fechado' };
 const PILL_CLASS = { aberto: 'p-aberto', andamento: 'p-andamento', concluido: 'p-concluido', assinando: 'p-assinando', fechado: 'p-fechado' };
 
@@ -77,6 +66,7 @@ async function save(id, dados) {
         alert(e.message);
     }
 }
+
 async function deleteOS(id) {
   const os = db.find(x => x.id === id);
   if (!os) return;
@@ -87,8 +77,6 @@ async function deleteOS(id) {
   try {
     await remove(ref(database, "os/" + id));
     toast('OS excluída');
-    // não precisa mexer no array "db" manualmente:
-    // o onValue já vai disparar e re-renderizar tudo sozinho
   } catch (e) {
     console.error("Erro ao excluir:", e);
     alert(e.message);
@@ -98,7 +86,6 @@ async function deleteOS(id) {
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebar-overlay');
-
   if (sidebar) sidebar.classList.toggle('open');
   if (overlay) overlay.classList.toggle('show');
 }
@@ -106,7 +93,6 @@ function toggleSidebar() {
 function closeSidebar() {
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebar-overlay');
-
   if (sidebar) sidebar.classList.remove('open');
   if (overlay) overlay.classList.remove('show');
 }
@@ -126,7 +112,7 @@ document.addEventListener('click', (e) => {
 });
 
 function goView(v) {
-    localStorage.setItem('currentView', v);
+  localStorage.setItem('currentView', v);
   closeSidebar();
   curView = v;
   document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
@@ -144,6 +130,7 @@ function openDrawer(id) {
   document.getElementById('drawer-title').textContent = id ? 'Editar OS' : 'Nova OS';
   document.getElementById('ov1').classList.add('show');
   document.getElementById('drawer-container1')?.classList.add('open') || document.getElementById('drawer1').classList.add('open');
+  
   if (id) {
     const o = db.find(x => x.id === id);
     document.getElementById('f-chamado').value = o.chamado || '';
@@ -186,9 +173,19 @@ function selStatus(el) {
   el.classList.add('on-' + curStatus);
 }
 
+function addHistorico(os, evento, usuario) {
+    if (!os.historico) os.historico = [];
+    os.historico.push({
+        data: new Date().toISOString(),
+        evento,
+        usuario
+    });
+}
+
 function saveOS() {
   const prob = document.getElementById('f-problema').value.trim();
   if (!prob) { alert('Informe o tipo de problema.'); return; }
+  
   const data = {
     chamado: document.getElementById('f-chamado').value.trim(),
     problema: prob,
@@ -204,19 +201,40 @@ function saveOS() {
   if (editId) {
     const idx = db.findIndex(x => x.id === editId);
     db[idx] = { ...db[idx], ...data };
-    save(editId, db[idx]);   // ✅ salva a OS editada no Firebase
+    addHistorico(db[idx], "OS atualizada", "Administrador");
+    save(editId, db[idx]);
     toast('OS atualizada');
   } else {
     const novaOS = {
-      id: 'os_' + Date.now(),
-      ...data,
-      sigTec: null, sigSol: null, sigAcomp: null,
-      pecas: [], iniciada: null, concluida: null,
-      tag: '', descEquipamento: '', acoesSsma: '',
-      ssma: { q1: null, q2: null, q3: null }
+        id: 'os_' + Date.now(),
+        ...data,
+        status: "aberto",
+        tecnico: {
+            id: curTec,
+            nome: curTec ? TEC[curTec].label : "",
+            telefone: curTec ? TEC[curTec].phone : "",
+            assinatura: null,
+            token: crypto.randomUUID(),
+            validacao: null
+        },
+        solicitante: {
+            nome: data.solicitante,
+            telefone: "",
+            assinatura: null,
+            token: crypto.randomUUID(),
+            aprovado: false,
+            observacao: "",
+            validacao: null
+        },
+        acompanhante: null,
+        pecas: [],
+        ssma: { q1: null, q2: null, q3: null },
+        historico: []
     };
+    
+    addHistorico(novaOS, "OS criada", "Administrador");
     db.push(novaOS);
-    save(novaOS.id, novaOS);  // ✅ salva a nova OS no Firebase
+    save(novaOS.id, novaOS);
     toast('OS criada');
   }
 
@@ -309,15 +327,12 @@ function renderOSList() {
   }).join('');
 }
 
-// 2. FUNÇÃO ATUALIZADA PARA ENVIAR MENSAGEM DIRETAMENTE AO TELEFONE DO TÉCNICO ATRIBUÍDO
 function makeWALink(os) {
     const tecObj = os.tec ? TEC[os.tec] : null;
     const phone = tecObj?.phone || "";
-
     const link = `${window.location.origin}${window.location.pathname}?os=${os.id}`;
 
-    const msg =
-`📋 *ORDEM DE SERVIÇO ${os.chamado || "S/N"}*
+    const msg = `📋 *ORDEM DE SERVIÇO ${os.chamado || "S/N"}*
 
 🔧 Problema: ${os.problema}
 📍 Local: ${os.area || "—"}
@@ -418,27 +433,26 @@ function buildTecPage(o) {
       </div>
     </section>
 
-<section class="tec-section">
-  <div class="tec-section-title">Tempos de Execução</div>
-
-  <div class="tempo-grid">
-    <div class="field">
-      <label>Início do Conserto</label>
-      <input type="datetime-local" id="tec-inicio" value="${o.iniciada || ''}">
-    </div>
-
-    <div class="field">
-      <label>Fim do Conserto</label>
-      <input type="datetime-local" id="tec-fim" value="${o.concluida || ''}">
-    </div>
-  </div>
-  ...
-</section>
-  <div class="field">
-    <label>Relatório Técnico / Serviço Realizado</label>
-    <textarea id="tec-servico" placeholder="Descreva o que foi feito com detalhes..."></textarea>
-  </div>
-</section>
+    <section class="tec-section">
+      <div class="tec-section-title">Tempos de Execução</div>
+      <div class="tempo-grid">
+        <div class="field">
+          <label>Início do Conserto</label>
+          <input type="datetime-local" id="tec-inicio" value="${o.iniciada || ''}">
+        </div>
+        <div class="field">
+          <label>Fim do Conserto</label>
+          <input type="datetime-local" id="tec-fim" value="${o.concluida || ''}">
+        </div>
+      </div>
+    </section>
+    
+    <section class="tec-section">
+      <div class="field">
+        <label>Relatório Técnico / Serviço Realizado</label>
+        <textarea id="tec-servico" placeholder="Descreva o que foi feito com detalhes...">${o.servicoRealizado || ''}</textarea>
+      </div>
+    </section>
 
     <section class="tec-section">
       <div class="tec-section-title">Peças Utilizadas</div>
@@ -527,25 +541,71 @@ function getSig(cid) {
   return hasContent ? c.toDataURL('image/png') : null;
 }
 
-function confirmarOS(id) {
-  const os = db.find(x => x.id === id); if (!os) return;
-  os.sigTec = getSig('sig-tec');
-  os.sigSol = getSig('sig-sol');
-  os.sigAcomp = getSig('sig-acomp');
-  os.pecas = [...pecas];
-  os.iniciada = document.getElementById('tec-inicio')?.value || null;
-  os.concluida = document.getElementById('tec-fim')?.value || null;
-  os.servicoRealizado = document.getElementById('tec-servico')?.value || '';
-  
-  os.tag = document.getElementById('tec-tag')?.value.trim() || '';
-  os.descEquipamento = document.getElementById('tec-desc-equip')?.value.trim() || '';
-  os.acoesSsma = document.getElementById('tec-acoes-ssma')?.value.trim() || '';
-  
-  os.ssma = { ...ssmaRespostas };
-  if (os.sigTec || os.sigSol) os.status = 'assinando';
-  save(os.id, os);
-  toast('Dados operacionais e segurança salvos! ✔');
-  renderOSList();
+async function confirmarOS(id) {
+  try {
+    const validacao = await gerarValidacao();
+    const os = db.find(x => x.id === id); if (!os) return;
+    
+    os.tecnico.validacao = validacao;
+    os.sigTec = getSig('sig-tec');
+    os.sigSol = getSig('sig-sol');
+    os.sigAcomp = getSig('sig-acomp');
+    os.pecas = [...pecas];
+    os.iniciada = document.getElementById('tec-inicio')?.value || null;
+    os.concluida = document.getElementById('tec-fim')?.value || null;
+    os.servicoRealizado = document.getElementById('tec-servico')?.value || '';
+    
+    os.tag = document.getElementById('tec-tag')?.value.trim() || '';
+    os.descEquipamento = document.getElementById('tec-desc-equip')?.value.trim() || '';
+    os.acoesSsma = document.getElementById('tec-acoes-ssma')?.value.trim() || '';
+    os.ssma = { ...ssmaRespostas };
+    
+    if (os.sigTec || os.sigSol) os.status = 'assinando';
+    
+    addHistorico(os, "Dados de execução e segurança consolidados", os.tecnico.nome || "Técnico");
+    
+    save(os.id, os);
+    toast('Dados operacionais e segurança salvos! ✔');
+    renderOSList();
+  } catch (e) {
+    console.error("Erro na validação/confirmação:", e);
+    toast('Erro ao processar validação digital.');
+  }
+}
+
+async function gerarValidacao(){
+    let gps = null;
+    try {
+        gps = await obterGPS();
+    } catch(e) {}
+    return {
+        data: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        plataforma: navigator.platform,
+        idioma: navigator.language,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        tela: `${screen.width}x${screen.height}`,
+        gps
+    };
+}
+
+function obterGPS(){
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+            reject();
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                resolve({
+                    lat: pos.coords.latitude,
+                    lng: pos.coords.longitude,
+                    precisao: pos.coords.accuracy
+                });
+            },
+            reject
+        );
+    });
 }
 
 function gerarPDF(id) {
@@ -555,103 +615,56 @@ function gerarPDF(id) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const W = 210, M = 12, cw = W - M * 2;
 
-function cell(x, y, w, h, text, opts = {}) {
+  function cell(x, y, w, h, text, opts = {}) {
+    if (opts.fill) doc.setFillColor(...opts.fill);
+    doc.setDrawColor(180, 180, 180);
+    doc.setLineWidth(0.2);
+    doc.rect(x, y, w, h, opts.fill ? 'FD' : 'S');
+    if (text === undefined || text === null || text === '') return;
 
-  if (opts.fill) doc.setFillColor(...opts.fill);
+    const fs = opts.fs || 8;
+    doc.setFont('helvetica', opts.bold ? 'bold' : 'normal');
+    doc.setFontSize(fs);
+    doc.setTextColor(...(opts.tc || [30,30,30]));
 
-  doc.setDrawColor(180, 180, 180);
-  doc.setLineWidth(0.2);
-
-  doc.rect(x, y, w, h, opts.fill ? 'FD' : 'S');
-
-  if (text === undefined || text === null || text === '') return;
-
-  const fs = opts.fs || 8;
-
-  doc.setFont('helvetica', opts.bold ? 'bold' : 'normal');
-  doc.setFontSize(fs);
-  doc.setTextColor(...(opts.tc || [30,30,30]));
-
-  const align = opts.align || 'left';
-
-  // posição horizontal
-  let tx;
-  switch (align) {
-    case 'center':
-      tx = x + w / 2;
-      break;
-
-    case 'right':
-      tx = x + w - 2;
-      break;
-
-    default:
-      tx = x + 2;
+    const align = opts.align || 'left';
+    let tx;
+    switch (align) {
+      case 'center': tx = x + w / 2; break;
+      case 'right': tx = x + w - 2; break;
+      default: tx = x + 2;
+    }
+    const dim = doc.getTextDimensions(String(text));
+    const ty = y + (h + dim.h) / 2 - 0.25;
+    doc.text(String(text), tx, ty, { align, maxWidth: w - 4 });
   }
 
-  // altura REAL do texto
-  const dim = doc.getTextDimensions(String(text));
-
-  // posição vertical perfeitamente centralizada
-  const ty = y + (h + dim.h) / 2 - 0.25;
-
-  doc.text(String(text), tx, ty, {
-    align,
-    maxWidth: w - 4
-  });
-}
   function hdr(x, y, w, h, text) {
-  cell(x, y, w, h, text, {
-    fill: [26,68,128],
-    tc: [255,255,255],
-    bold: true,
-    fs: 8,
-    align: 'center'
-  });
-}
+    cell(x, y, w, h, text, { fill: [26,68,128], tc: [255,255,255], bold: true, fs: 8, align: 'center' });
+  }
   function lbl(x, y, w, h, text) { cell(x, y, w, h, text, { fill: [235, 240, 248], tc: [26, 68, 128], bold: true, fs: 7.5 }); }
   function val(x, y, w, h, text) { cell(x, y, w, h, text, { fs: 8 }); }
 
- let y = M;
+  let y = M;
+  hdr(M, y, cw, 8, 'ORDEM DE SERVIÇO — F-ZZ-181B-0020');
+  y += 8;
 
-hdr(M, y, cw, 8, 'ORDEM DE SERVIÇO — F-ZZ-181B-0020');
-y += 8;
+  lbl(M, y, 30, 6, 'N° OS / Chamado'); val(M + 30, y, 35, 6, os.chamado || '—');
+  lbl(M + 65, y, 30, 6, 'Tipo de Serviço'); val(M + 95, y, cw - 95, 6, 'CORRETIVA');
+  y += 6;
 
-// ===== Linha 1 =====
-lbl(M, y, 30, 6, 'N° OS / Chamado');
-val(M + 30, y, 35, 6, os.chamado || '—');
+  lbl(M, y, 30, 6, 'Data de Abertura'); val(M + 30, y, 35, 6, fmtDate(os.data));
+  lbl(M + 65, y, 30, 6, 'Especialidade'); val(M + 95, y, cw - 95, 6, os.esp || '—');
+  y += 6;
 
-lbl(M + 65, y, 30, 6, 'Tipo de Serviço');
-val(M + 95, y, cw - 95, 6, 'CORRETIVA');
+  lbl(M, y, 30, 6, 'Solicitante'); val(M + 30, y, cw - 30, 6, os.solicitante || '—');
+  y += 6;
 
-y += 6;
+  lbl(M, y, 30, 6, 'Local / Área'); val(M + 30, y, cw - 30, 6, os.area || '—');
+  y += 6;
 
-// ===== Linha 2 =====
-lbl(M, y, 30, 6, 'Data de Abertura');
-val(M + 30, y, 35, 6, fmtDate(os.data));
-
-lbl(M + 65, y, 30, 6, 'Especialidade');
-val(M + 95, y, cw - 95, 6, os.esp || '—');
-
-y += 6;
-
-// ===== Linha 3 =====
-lbl(M, y, 30, 6, 'Solicitante');
-val(M + 30, y, cw - 30, 6, os.solicitante || '—');
-
-y += 6;
-
-// ===== Linha 4 =====
-lbl(M, y, 30, 6, 'Local / Área');
-val(M + 30, y, cw - 30, 6, os.area || '—');
-
-y += 6;
-
-// ===== Linha 5 =====
-lbl(M, y, 30, 6, 'Técnico');
-val(M + 30, y, cw - 30, 6, os.tec ? TEC[os.tec].label : '—');
-
-y += 8;
+  lbl(M, y, 30, 6, 'Técnico'); val(M + 30, y, cw - 30, 6, os.tec ? TEC[os.tec].label : '—');
+  y += 8;
 
   hdr(M, y, cw, 6, 'TAG: Descrição do Equipamento'); y += 6;
   lbl(M, y, 20, 7, 'TAG:'); val(M + 20, y, 45, 7, os.tag || '—');
@@ -689,22 +702,19 @@ y += 8;
   const srH = Math.max(12, srLines.length * 4 + 4); cell(M, y, cw, srH, '');
   doc.text(srLines, M + 2, y + 4); y += srH;
 
- hdr(M, y, cw, 6, 'Tempos de Execução e Ocorrência'); y += 6;
-const eC1 = 60, eC2 = 63, eC3 = 63;
-lbl(M, y, eC1, 5, 'Etapa'); lbl(M + eC1, y, eC2, 5, 'Data'); lbl(M + eC1 + eC2, y, eC3, 5, 'Hora'); y += 5;
+  hdr(M, y, cw, 6, 'Tempos de Execução e Ocorrência'); y += 6;
+  const eC1 = 60, eC2 = 63, eC3 = 63;
+  lbl(M, y, eC1, 5, 'Etapa'); lbl(M + eC1, y, eC2, 5, 'Data'); lbl(M + eC1 + eC2, y, eC3, 5, 'Hora'); y += 5;
 
-const etapas = [
-  { et: 'Início da Ocorrência', data: fmtDate(os.data), hora: '—' },
-  { et: 'Início do Conserto', data: os.iniciada ? os.iniciada.slice(0, 10).split('-').reverse().join('/') : '—', hora: os.iniciada ? os.iniciada.slice(11, 16) : '—' },
-  { et: 'Fim do Conserto', data: os.concluida ? os.concluida.slice(0, 10).split('-').reverse().join('/') : '—', hora: os.concluida ? os.concluida.slice(11, 16) : '—' },
-];
-etapas.forEach(l => {
-  lbl(M, y, eC1, 5, l.et);
-  val(M + eC1, y, eC2, 5, l.data);
-  val(M + eC1 + eC2, y, eC3, 5, l.hora);
-  y += 5;
-});
-y += 2;
+  const etapas = [
+    { et: 'Início da Ocorrência', data: fmtDate(os.data), hora: '—' },
+    { et: 'Início do Conserto', data: os.iniciada ? os.iniciada.slice(0, 10).split('-').reverse().join('/') : '—', hora: os.iniciada ? os.iniciada.slice(11, 16) : '—' },
+    { et: 'Fim do Conserto', data: os.concluida ? os.concluida.slice(0, 10).split('-').reverse().join('/') : '—', hora: os.concluida ? os.concluida.slice(11, 16) : '—' },
+  ];
+  etapas.forEach(l => {
+    lbl(M, y, eC1, 5, l.et); val(M + eC1, y, eC2, 5, l.data); val(M + eC1 + eC2, y, eC3, 5, l.hora); y += 5;
+  });
+  y += 2;
 
   hdr(M, y, cw, 6, 'Materiais e Peças Utilizadas'); y += 6;
   lbl(M, y, 35, 5, 'Código'); lbl(M + 35, y, cw - 60, 5, 'Descrição da Peça / Insumo'); lbl(M + cw - 25, y, 25, 5, 'Quantidade'); y += 5;
@@ -738,22 +748,15 @@ function toast(msg) { const t = document.getElementById('toast'); t.textContent 
 
 const params = new URLSearchParams(window.location.search);
 const osId = params.get("os");
-
 if (osId) {
-
     const esperar = setInterval(() => {
-
         const os = db.find(o => o.id === osId);
-
         if (!os) return;
-
         clearInterval(esperar);
-
         renderTecPage(os.id);
-
-    },100);
-
+    }, 100);
 }
+
 window.goView = goView;
 window.toggleSidebar = toggleSidebar;
 window.closeSidebar = closeSidebar;
@@ -770,4 +773,3 @@ window.selTec = selTec;
 window.selStatus = selStatus;
 window.setFilter = setFilter;
 window.deleteOS = deleteOS;
-

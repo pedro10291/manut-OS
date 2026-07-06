@@ -906,6 +906,17 @@ body.modo-tecnico .main-content-container{
 body.modo-tecnico .simulation-selector-container{
   display:none;
 }
+.ssma-btn.yes.active {
+  background-color: var(--green) !important;
+  border-color: var(--green) !important;
+  color: #fff;
+}
+
+.ssma-btn.no.active {
+  background-color: var(--red) !important;
+  border-color: var(--red) !important;
+  color: #fff;
+}
 @media(max-width:768px){
 
   /* MENU MOBILE */
