@@ -557,7 +557,7 @@ function renderPainel() {
 
 function renderOSList() {
   renderDatalist();
-  const rows = db.filter(o => curFilter === 'all' || o.status === curFilter).slice().sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+  const rows = db.filter(o => curFilter === 'aberto' || o.status === curFilter).slice().sort((a, b) => (b.data || '').localeCompare(a.data || ''));
   const wrap = document.getElementById('os-list');
   if (!rows.length) { wrap.innerHTML = '<div class="empty"><div class="empty-icon">🔧</div><p>Nenhuma OS nesta categoria.</p></div>'; return; }
   
@@ -675,11 +675,11 @@ function gerarPDF(id) {
   });
   y += 3;
 
-  hdr(M, y, cw, 5.5, 'Assinatura Digital & Auditoria (Homologação via Hardware ID)'); y += 5.5;
+  hdr(M, y, cw, 5.5, 'Assinatura Digital & Auditoria (Homologação via Hardware ID e Pin)'); y += 5.5;
   const sw = cw / 2;
   
   lbl(M, y, sw, 5, 'Executante / Técnico'); 
-  lbl(M + sw, y, sw, 5, 'Solicitante / Aceite'); y += 5;
+  lbl(M + sw, y, sw, 5, 'Solicitante'); y += 5;
   
   cell(M, y, sw, 25, ''); 
   cell(M + sw, y, sw, 25, '');
@@ -689,7 +689,7 @@ function gerarPDF(id) {
     doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(30, 30, 30);
     doc.text(os.tecnico.nome || 'Técnico Registrado', M + 4, y + 5);
  doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(22, 163, 74);
-    doc.text('OK - Confirmado através do dispositivo', M + 4, y + 10);
+    doc.text('OK - Confirmado através do dispositivo e PIN', M + 4, y + 10);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(71, 85, 105);
     doc.text(obterNomeDispositivo(vTec.userAgent), M + 4, y + 15);
     doc.text(obterNavegador(vTec.userAgent), M + 4, y + 19);
