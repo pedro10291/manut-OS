@@ -8,15 +8,29 @@ import {
 
 const KEY = 'os_sys_v1';
 let db = [];
+let dbAnterior = [];
 
 onValue(ref(database, "os"), (snapshot) => {
     const dados = snapshot.val();
-    db = dados ? Object.values(dados) : [];
+    const novaLista = dados ? Object.values(dados) : [];
+
+    // Detecta OS que acabaram de entrar em "assinando" (técnico finalizou e aguarda encaminhamento ao solicitante)
+    novaLista.forEach(o => {
+      const anterior = dbAnterior.find(a => a.id === o.id);
+      const eraAssinando = anterior && anterior.status === 'assinando';
+      if (o.status === 'assinando' && !eraAssinando) {
+        notificarSupervisor(o);
+      }
+    });
+
+    db = novaLista;
+    dbAnterior = novaLista;
 
     renderPainel();
     renderOSList();
     renderTecSelect();
     abrirOSPeloLink();
+    atualizarBadgeNotificacoes();
 });
 
 function abrirOSPeloLink() {
@@ -39,8 +53,8 @@ function abrirOSPeloLink() {
     document.getElementById("fab").style.display = "none";
 }
 
-let curFilter = 'all';
 let curStatus = 'aberto';
+let curFilter = 'all';
 let curTec = null;
 let editId = null;
 let curView = 'painel';
@@ -275,6 +289,22 @@ function obterGPS(){
     });
 }
 
+// VERIFICAÇÃO DE SEGURANÇA POR PIN (últimos 4 dígitos do celular do técnico)
+function verificarPinTecnico(tecId) {
+  const tec = tecId ? TEC[tecId] : null;
+  if (!tec || !tec.phone) return true; // sem técnico definido na OS, não bloqueia
+
+  const pinCorreto = tec.phone.slice(-4);
+  const pinDigitado = prompt(`🔒 Verificação de segurança\nDigite os 4 últimos dígitos do celular de ${tec.label} para confirmar sua identidade:`);
+
+  if (pinDigitado === null) return false; // usuário cancelou
+  if (pinDigitado.trim() !== pinCorreto) {
+    alert('❌ PIN incorreto. Operação cancelada por segurança.');
+    return false;
+  }
+  return true;
+}
+
 // NOVO FLUXO DE OPERAÇÃO DINÂMICO (INICIAR / FINALIZAR / ACEITE)
 async function fecharOperacaoTecnico(id) {
   const os = db.find(x => x.id === id); 
@@ -291,10 +321,12 @@ async function fecharOperacaoTecnico(id) {
 
   // ETAPA 1: Se o técnico está iniciando a OS
   if (papelAtual === 'tecnico' && (os.status === 'aberto' || !os.status)) {
+      if (!verificarPinTecnico(os.tec)) return;
+
       os.iniciada = new Date().toISOString().slice(0, 16); // Salva data/hora local atual
       os.status = 'andamento';
       if(!os.historico) os.historico = [];
-      os.historico.push({ data: new Date().toISOString(), evento: "Serviço Iniciado pelo Técnico", usuario: os.tecnico.nome });
+      os.historico.push({ data: new Date().toISOString(), evento: "Serviço Iniciado pelo Técnico (PIN verificado)", usuario: os.tecnico.nome });
       
       await save(os.id, os);
       toast('Serviço iniciado com sucesso! 🚀');
@@ -307,6 +339,7 @@ async function fecharOperacaoTecnico(id) {
       const servico = document.getElementById('tec-servico')?.value.trim() || '';
       if (!servico) { alert("⚠️ Erro: Você precisa descrever o Serviço Realizado no Relatório Técnico antes de finalizar."); return; }
       if (!ssmaRespostas.q1 || !ssmaRespostas.q2 || !ssmaRespostas.q3) { alert("⚠️ Erro: Responda as perguntas de SSMA/Segurança antes de finalizar."); return; }
+      if (!verificarPinTecnico(os.tec)) return;
 
       const validacao = await gerarValidacao();
       os.tecnico.validacao = validacao;
@@ -322,24 +355,12 @@ async function fecharOperacaoTecnico(id) {
       os.ssma = { ...ssmaRespostas };
 
       if(!os.historico) os.historico = [];
-      os.historico.push({ data: new Date().toISOString(), evento: "Relatório operacional finalizado pelo Técnico", usuario: os.tecnico.nome });
+      os.historico.push({ data: new Date().toISOString(), evento: "Relatório operacional finalizado pelo Técnico (PIN verificado)", usuario: os.tecnico.nome });
 
       await save(os.id, os);
       toast('Validação do técnico efetuada! ✔');
-      alert('Relatório técnico salvo com sucesso! Encaminhe o link para o solicitante efetuar o Aceite via aparelho.');
-      
-const link = `${window.location.origin}${window.location.pathname}?os=${os.id}&role=solicitante`;
+      alert('Relatório técnico salvo com sucesso! O supervisor foi notificado e fará o encaminhamento do aceite ao solicitante.');
 
-const texto =
-`🔔 *Solicitação de Aceite*
-
-O serviço foi concluído.
-
-Abra o link abaixo para validar a execução:
-
-${link}`;
-
-window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, "_blank");
       renderTecPage(os.id, papelAtual);
       return;
   }
@@ -392,8 +413,7 @@ const isDisabled = isSol || (papelAtual === 'tecnico' && (o.status === 'aberto' 
       else { btnTexto = "✔ Registrar Aceite Digital"; btnCor = "#16a34a"; }
   }
 
-  wrap.innerHTML = `<div class="tec-page" style="background:#fff; max-width:600px; margin:0 auto; font-family:inherit; color:#334155;">
-    <header class="tec-header" style="background:#f8fafc; border-bottom:1px solid #e2e8f0; padding:20px; border-radius:8px 8px 0 0;">
+  wrap.innerHTML = `<div class="tec-page" style="background:#fff; max-width:600px; margin:0 auto; font-family:inherit; color:#334155; position:relative;">    <header class="tec-header" style="background:#f8fafc; border-bottom:1px solid #e2e8f0; padding:20px; border-radius:8px 8px 0 0;">
       <div class="tec-os-num" style="font-size:12px; font-weight:700; color:#1a4480; text-transform:uppercase; margin-bottom:4px;">Chamado ${o.chamado || 'S/N'} · ${o.esp}</div>
       <div class="tec-os-title" style="font-size:22px; font-weight:800; color:#0f172a; margin-bottom:6px;">${o.problema}</div>
       <div class="tec-os-sub" style="font-size:14px; color:#475569;">📍 Área: <strong>${o.area || '—'}</strong>  · Solicitante: <strong>${exibeNomeSol}</strong></div>
@@ -457,6 +477,18 @@ const isDisabled = isSol || (papelAtual === 'tecnico' && (o.status === 'aberto' 
       <button class="btn btn-green" id="btn-principal-fluxo" style="flex:1; background:${btnCor}; color:#fff; font-weight:700; padding:12px; border:none; border-radius:6px; cursor:pointer;" onclick="fecharOperacaoTecnico('${o.id}')">${btnTexto}</button>
       <button class="btn btn-primary" style="flex:1; background:#1a4480; color:#fff; font-weight:700; padding:12px; border:none; border-radius:6px; cursor:pointer;" onclick="gerarPDF('${o.id}')">📄 Gerar PDF</button>
     </footer>
+
+    ${o.status === 'fechado' ? `
+    <div id="overlay-finalizado" style="position:absolute; inset:0; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); background:rgba(255,255,255,0.6); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:5; border-radius:8px; text-align:center; padding:24px;">
+      <div style="font-size:52px; margin-bottom:10px;">✅</div>
+      <div style="font-size:24px; font-weight:800; color:#166534; margin-bottom:6px;">Serviço Realizado</div>
+      <div style="font-size:14px; color:#475569; margin-bottom:4px;">Chamado ${o.chamado || 'S/N'}</div>
+      <div style="font-size:13px; color:#64748b; margin-bottom:20px;">Homologado e encerrado por técnico e solicitante.</div>
+      <div style="display:flex; gap:10px;">
+        <button onclick="document.getElementById('overlay-finalizado').style.display='none'" style="padding:10px 18px; background:#fff; border:1px solid #cbd5e1; border-radius:6px; font-weight:700; cursor:pointer; color:#334155;">👁 Ver detalhes</button>
+        <button onclick="gerarPDF('${o.id}')" style="padding:10px 18px; background:#1a4480; color:#fff; border:none; border-radius:6px; font-weight:700; cursor:pointer;">📄 Gerar PDF</button>
+      </div>
+    </div>` : ''}
   </div>`;
 
   const selBox = document.getElementById("tec-os-select");
@@ -707,6 +739,128 @@ function renderPecasList(isDisabled = false) {
 function fmtDate(d) { if (!d) return '—'; try { return new Date(d + 'T12:00').toLocaleDateString('pt-BR'); } catch { return d; } }
 function toast(msg) { const t = document.getElementById('toast'); if(t){ t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); } }
 
+// ===== NOTIFICAÇÃO AO SUPERVISOR (quando técnico finaliza e aguarda encaminhamento ao solicitante) =====
+let notifLidas = JSON.parse(localStorage.getItem('notifLidas') || '[]');
+
+function initNotificacoes() {
+  if (document.getElementById('sino-notif')) return; // evita duplicar
+
+  const style = document.createElement('style');
+  style.textContent = `
+    #sino-notif { position: fixed; top: 16px; right: 16px; z-index: 9999; width: 44px; height: 44px; border-radius: 50%;
+      background: #7c3aed; color: #fff; border: none; cursor: pointer; font-size: 20px; box-shadow: 0 4px 12px rgba(124,58,237,0.4);
+      display: flex; align-items: center; justify-content: center; }
+    #sino-badge { position: fixed; top: 12px; right: 12px; z-index: 10000; background: #dc2626; color: #fff; font-size: 11px;
+      font-weight: 700; min-width: 18px; height: 18px; border-radius: 9px; display: none; align-items: center; justify-content: center;
+      padding: 0 4px; pointer-events: none; }
+    #painel-notif { position: fixed; top: 68px; right: 16px; z-index: 9998; width: 320px; max-height: 420px; overflow-y: auto;
+      background: #fff; border: 1px solid #ede9fe; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); display: none; }
+    #painel-notif .notif-header { padding: 12px 14px; font-weight: 700; font-size: 13px; color: #6b21a8; background: #f5f3ff;
+      border-bottom: 1px solid #ede9fe; border-radius: 10px 10px 0 0; }
+    #painel-notif .notif-item { padding: 12px 14px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+    #painel-notif .notif-item b { display: block; color: #1e293b; margin-bottom: 2px; }
+    #painel-notif .notif-item span { color: #64748b; font-size: 12px; }
+    #painel-notif .notif-actions { margin-top: 8px; display: flex; gap: 6px; }
+    #painel-notif .notif-actions button { flex: 1; border: none; border-radius: 5px; padding: 6px 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
+    #painel-notif .notif-btn-enviar { background: #16a34a; color: #fff; }
+    #painel-notif .notif-btn-ok { background: #f1f5f9; color: #475569; }
+    #painel-notif .notif-empty { padding: 20px 14px; text-align: center; color: #94a3b8; font-size: 12px; }
+  `;
+  document.head.appendChild(style);
+
+  const sino = document.createElement('button');
+  sino.id = 'sino-notif';
+  sino.textContent = '🔔';
+  sino.onclick = toggleNotificacoes;
+  document.body.appendChild(sino);
+
+  const badge = document.createElement('div');
+  badge.id = 'sino-badge';
+  document.body.appendChild(badge);
+
+  const painel = document.createElement('div');
+  painel.id = 'painel-notif';
+  document.body.appendChild(painel);
+
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function osPendentesEnvio() {
+  return db.filter(o => o.status === 'assinando' && !notifLidas.includes(o.id));
+}
+
+function atualizarBadgeNotificacoes() {
+  const badge = document.getElementById('sino-badge');
+  if (!badge) return;
+  const pendentes = osPendentesEnvio();
+  if (pendentes.length > 0) {
+    badge.textContent = pendentes.length;
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
+  }
+  if (document.getElementById('painel-notif')?.style.display === 'block') {
+    renderPainelNotificacoes();
+  }
+}
+
+function toggleNotificacoes() {
+  const painel = document.getElementById('painel-notif');
+  if (!painel) return;
+  const abrir = painel.style.display !== 'block';
+  painel.style.display = abrir ? 'block' : 'none';
+  if (abrir) renderPainelNotificacoes();
+}
+
+function renderPainelNotificacoes() {
+  const painel = document.getElementById('painel-notif');
+  if (!painel) return;
+  const pendentes = osPendentesEnvio();
+  painel.innerHTML = `<div class="notif-header">🔔 OS aguardando envio ao solicitante</div>` +
+    (pendentes.length ? pendentes.map(o => `
+      <div class="notif-item">
+        <b>${o.chamado || 'S/N'} — ${o.problema}</b>
+        <span>Técnico: ${o.tecnico?.nome || '—'}</span>
+        <div class="notif-actions">
+          <button class="notif-btn-enviar" onclick="encaminharParaSolicitante('${o.id}')">📲 Encaminhar p/ WhatsApp</button>
+          <button class="notif-btn-ok" onclick="marcarNotifVista('${o.id}')">Marcar visto</button>
+        </div>
+      </div>`).join('') : '<div class="notif-empty">Nenhuma OS pendente de envio 🎉</div>');
+}
+
+function marcarNotifVista(id) {
+  if (!notifLidas.includes(id)) notifLidas.push(id);
+  localStorage.setItem('notifLidas', JSON.stringify(notifLidas));
+  atualizarBadgeNotificacoes();
+}
+
+function encaminharParaSolicitante(id) {
+  const os = db.find(o => o.id === id);
+  if (!os) return;
+
+  const link = `${window.location.origin}${window.location.pathname}?os=${os.id}&role=solicitante`;
+  const texto = `🔔 *Solicitação de Aceite*\n\nO serviço foi concluído.\n\nAbra o link abaixo para validar a execução:\n\n${link}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, "_blank");
+  marcarNotifVista(id);
+}
+
+function notificarSupervisor(os) {
+  toast(`🔔 OS ${os.chamado || os.id} finalizada pelo técnico — encaminhe para o solicitante`);
+  atualizarBadgeNotificacoes();
+
+  if ('Notification' in window && Notification.permission === 'granted') {
+    const n = new Notification('OS finalizada — aguardando envio', {
+      body: `${os.chamado || 'S/N'} — ${os.problema}\nClique para encaminhar ao solicitante.`,
+      icon: undefined
+    });
+    n.onclick = () => { window.focus(); toggleNotificacoes(); };
+  }
+}
+
+initNotificacoes();
+
 const params = new URLSearchParams(window.location.search);
 const osId = params.get("os");
 if (osId) {
@@ -724,3 +878,5 @@ window.fecharOperacaoTecnico = fecharOperacaoTecnico; window.gerarPDF = gerarPDF
 window.closeDrawer = closeDrawer; window.saveOS = saveOS; window.selTec = selTec; 
 window.selStatus = selStatus; window.setFilter = setFilter; window.deleteOS = deleteOS; 
 window.removePeca = removePeca;
+window.toggleNotificacoes = toggleNotificacoes; window.marcarNotifVista = marcarNotifVista; 
+window.encaminharParaSolicitante = encaminharParaSolicitante;
