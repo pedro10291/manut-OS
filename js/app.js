@@ -548,9 +548,27 @@ function renderPainel() {
 
   const ult = db.slice().sort((a, b) => (b.data || '').localeCompare(a.data || '')).slice(0, 5);
   document.getElementById('ultimas-list').innerHTML = ult.length ? ult.map(o => `
-    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="goView('os')">
+    <div style="
+display:flex;
+align-items:center;
+gap:10px;
+padding:8px 0;
+border-bottom:1px solid var(--border);
+cursor:pointer;
+min-width:0;
+">
       <span style="font-size:11px;font-weight:700;color:var(--accent);font-family:monospace">${o.chamado || '—'}</span>
-      <span style="flex:1;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.problema}</span>
+      <span style="
+flex:1;
+min-width:0;
+font-size:13px;
+font-weight:500;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+">
+${o.problema}
+</span>
       <span class="pill ${PILL_CLASS[o.status || 'aberto']}">${STATUS_LABEL[o.status || 'aberto']}</span>
     </div>`).join('') : '<div class="empty"><p>Nenhuma OS ainda.</p></div>';
 }
