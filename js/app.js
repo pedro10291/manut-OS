@@ -5,33 +5,101 @@ import {
   remove,
   onValue
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+import { initAuth, getUsuarioAtual, fazerLogout, criarConvite } from "./auth.js";
 
 const KEY = 'os_sys_v1';
 let db = [];
 let dbAnterior = [];
+let appIniciado = false;
 
-onValue(ref(database, "os"), (snapshot) => {
-    const dados = snapshot.val();
-    const novaLista = dados ? Object.values(dados) : [];
+function iniciarEscutaDados() {
+  if (appIniciado) return;
+  appIniciado = true;
 
-    // Detecta OS que acabaram de entrar em "assinando" (técnico finalizou e aguarda encaminhamento ao solicitante)
-    novaLista.forEach(o => {
-      const anterior = dbAnterior.find(a => a.id === o.id);
-      const eraAssinando = anterior && anterior.status === 'assinando';
-      if (o.status === 'assinando' && !eraAssinando) {
-        notificarSupervisor(o);
-      }
-    });
+  onValue(ref(database, "os"), (snapshot) => {
+      const dados = snapshot.val();
+      const novaLista = dados ? Object.values(dados) : [];
 
-    db = novaLista;
-    dbAnterior = novaLista;
+      // Detecta OS que acabaram de entrar em "assinando" (técnico finalizou e aguarda encaminhamento ao solicitante)
+      novaLista.forEach(o => {
+        const anterior = dbAnterior.find(a => a.id === o.id);
+        const eraAssinando = anterior && anterior.status === 'assinando';
+        if (o.status === 'assinando' && !eraAssinando) {
+          notificarSupervisor(o);
+        }
+      });
 
-    renderPainel();
-    renderOSList();
-    renderTecSelect();
-    abrirOSPeloLink();
-    atualizarBadgeNotificacoes();
-});
+      db = novaLista;
+      dbAnterior = novaLista;
+
+      renderPainel();
+      renderOSList();
+      renderTecSelect();
+      renderMeusChamados();
+      abrirOSPeloLink();
+      atualizarBadgeNotificacoes();
+  });
+}
+
+// ---------- CONTROLE DE ACESSO POR PAPEL ----------
+function aplicarRestricoesPapel(usuario) {
+  document.querySelectorAll('[data-role]').forEach(el => {
+    const papeis = el.getAttribute('data-role').split(',');
+    el.style.display = papeis.includes(usuario.role) ? '' : 'none';
+  });
+
+  const info = document.getElementById('sidebar-user-info');
+  if (info) info.textContent = `${usuario.nome || usuario.email} (${usuario.role})`;
+  const footer = document.getElementById('sidebar-footer');
+  if (footer) footer.style.display = '';
+
+  if (usuario.role === 'tecnico') {
+    goView('tec-link');
+  } else if (usuario.role === 'usuario') {
+    goView('meus-chamados');
+  } else {
+    goView(localStorage.getItem('currentView') || 'painel');
+  }
+}
+
+window.fazerLogoutUI = () => {
+  if (confirm('Deseja sair da sua conta?')) fazerLogout();
+};
+
+window.gerarConviteUI = async () => {
+  const nome = document.getElementById('cv-nome').value.trim();
+  const role = document.getElementById('cv-role').value;
+  const tecId = document.getElementById('cv-tecid').value;
+  if (!nome) { alert('Informe o nome da pessoa.'); return; }
+
+  const token = await criarConvite({ nome, role, tecId: role === 'tecnico' ? tecId : null });
+  const link = `${window.location.origin}${window.location.pathname.replace('index.html', '')}cadastro.html?convite=${token}`;
+  const texto = `Olá, ${nome}! Segue o link para você criar sua senha de acesso ao sistema de manutenção:\n\n${link}`;
+
+  document.getElementById('cv-resultado').innerHTML = `
+    <div class="field">
+      <label>Link gerado para ${nome} (${role})</label>
+      <input readonly value="${link}" onclick="this.select()">
+    </div>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button class="btn" onclick="navigator.clipboard.writeText('${link}'); toast('Link copiado! ✔')">📋 Copiar link</button>
+      <button class="btn btn-primary" onclick="window.open('https://wa.me/?text=${encodeURIComponent(texto)}','_blank')">📲 Enviar por WhatsApp</button>
+    </div>`;
+  document.getElementById('cv-nome').value = '';
+};
+
+// Link direto de campo (?os=...&role=tecnico|solicitante) NUNCA passa por login —
+// a segurança nesse caso é o PIN de identidade do técnico (ver verificarPinTecnico).
+const paramsIniciais = new URLSearchParams(window.location.search);
+if (paramsIniciais.get('os')) {
+  document.getElementById('app-container')?.classList.remove('oculto');
+  iniciarEscutaDados();
+} else {
+  initAuth((usuario) => {
+    iniciarEscutaDados();
+    aplicarRestricoesPapel(usuario);
+  });
+}
 
 function abrirOSPeloLink() {
     const params = new URLSearchParams(window.location.search);
@@ -121,6 +189,7 @@ function goView(v) {
   if (v === 'painel') renderPainel();
   if (v === 'os') renderOSList();
   if (v === 'tec-link') renderTecSelect();
+  if (v === 'meus-chamados') renderMeusChamados();
 }
 
 function openDrawer(id) {
@@ -130,6 +199,13 @@ function openDrawer(id) {
   
   //  CORRIGIDO: Aponta diretamente para o id correto do seu HTML usando a sintaxe certa
   document.getElementById('drawer1')?.classList.add('open');
+
+  const usuario = getUsuarioAtual();
+  const ehSolicitante = usuario && usuario.role === 'usuario';
+  document.getElementById('campo-tec').style.display = ehSolicitante ? 'none' : '';
+  document.getElementById('campo-status').style.display = ehSolicitante ? 'none' : '';
+  const campoSolic = document.getElementById('f-solicitante');
+  campoSolic.disabled = !!ehSolicitante;
   
   if (id) {
     const o = db.find(x => x.id === id);
@@ -146,6 +222,7 @@ function openDrawer(id) {
     ['f-chamado', 'f-problema', 'f-area', 'f-solicitante', 'f-desc'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('f-esp').value = 'Predial';
     document.getElementById('f-data').value = new Date().toISOString().slice(0, 10);
+    if (ehSolicitante) document.getElementById('f-solicitante').value = usuario.nome;
   }
   document.querySelectorAll('.tec-opt').forEach(e => e.classList.remove('sel'));
   if (curTec) {
@@ -178,7 +255,9 @@ function selStatus(el) {
 function saveOS() {
   const prob = document.getElementById('f-problema').value.trim();
   if (!prob) { alert('Informe o tipo de problema.'); return; }
-  const solicitanteNome = document.getElementById('f-solicitante').value.trim();
+  const usuarioLogado = getUsuarioAtual();
+  const ehSolicitante = usuarioLogado && usuarioLogado.role === 'usuario';
+  const solicitanteNome = ehSolicitante ? usuarioLogado.nome : document.getElementById('f-solicitante').value.trim();
   
   const data = {
     chamado: document.getElementById('f-chamado').value.trim(),
@@ -187,8 +266,8 @@ function saveOS() {
     data: document.getElementById('f-data').value,
     area: document.getElementById('f-area').value.trim(),
     desc: document.getElementById('f-desc').value.trim(),
-    tec: curTec,
-    status: curStatus
+    tec: ehSolicitante ? null : curTec,
+    status: ehSolicitante ? 'aberto' : curStatus
   };
 
   if (editId) {
@@ -744,7 +823,42 @@ function gerarPDF(id) {
 
 function setFilter(f, btn) { curFilter = f; document.querySelectorAll('.f-chip').forEach(b => b.classList.remove('on')); btn.classList.add('on'); renderOSList(); }
 function renderDatalist() { const probs = [...new Set(db.map(o => o.problema))]; document.getElementById('prob-dl').innerHTML = probs.map(p => `<option value="${p}">`).join(''); }
-function renderTecSelect() { const sel = document.getElementById('tec-os-select'); if (sel) sel.innerHTML = '<option value="">— escolha uma OS —</option>' + db.map(o => `<option value="${o.id}">${o.chamado || '?'} — ${o.problema}</option>`).join(''); }
+function renderTecSelect() {
+  const sel = document.getElementById('tec-os-select');
+  if (!sel) return;
+  const usuario = getUsuarioAtual();
+  const rows = (usuario && usuario.role === 'tecnico')
+    ? db.filter(o => o.tec === usuario.tecId)
+    : db;
+  sel.innerHTML = '<option value="">— escolha uma OS —</option>' + rows.map(o => `<option value="${o.id}">${o.chamado || '?'} — ${o.problema}</option>`).join('');
+}
+
+function renderMeusChamados() {
+  const wrap = document.getElementById('meus-chamados-list');
+  if (!wrap) return;
+  const usuario = getUsuarioAtual();
+  if (!usuario || usuario.role !== 'usuario') return;
+
+  const rows = db.filter(o => (o.solicitante || '').trim().toLowerCase() === (usuario.nome || '').trim().toLowerCase())
+    .slice().sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+
+  if (!rows.length) { wrap.innerHTML = '<div class="empty"><div class="empty-icon">🗂</div><p>Nenhum chamado encontrado para o seu usuário.</p></div>'; return; }
+
+  wrap.innerHTML = rows.map(o => `<div class="os-card">
+      <span class="os-num">${o.chamado || '—'}</span>
+      <div class="os-info">
+        <div class="os-desc">${o.problema}</div>
+        <div class="os-meta">
+          <span class="esp-tag">${o.esp}</span>
+          <span>${o.area || '—'}</span>
+          <span>${fmtDate(o.data)}</span>
+        </div>
+      </div>
+      <div class="os-actions">
+          <span class="pill ${PILL_CLASS[o.status || 'aberto']}">${STATUS_LABEL[o.status || 'aberto']}</span>
+      </div>
+    </div>`).join('');
+}
 function setSSMA(campo, valor) { ssmaRespostas[campo] = valor; document.querySelectorAll(`[data-q="${campo}"]`).forEach(btn => btn.classList.remove('active')); if (valor !== null) { document.querySelector(`[data-q="${campo}"][data-v="${valor}"]`)?.classList.add('active'); } }
 function addPeca() { pecas.push({ cod: '', desc: '', qtd: '' }); renderPecasList(false); }
 function removePeca(i) { pecas.splice(i, 1); renderPecasList(false); }

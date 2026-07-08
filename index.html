@@ -3,161 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema OS — Manutenção</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <link rel="stylesheet" href="css/style.css">
-
+  <title>Sistema OS v2</title>
+  <meta name="description" content="Sistema de Gestão de Ordens de Serviço v2.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #0b1120;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 28px;
+      font-weight: 800;
+      color: #3b82f6;
+      letter-spacing: -1px;
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid rgba(59,130,246,0.2);
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    p { font-size: 13px; color: #64748b; }
+  </style>
 </head>
 <body>
+  <div class="brand">Sistema OS</div>
+  <div class="spinner"></div>
+  <p>Verificando autenticação...</p>
 
-  <div class="app-container">
-    
-    <aside class="sidebar-container" id="sidebar">
-      <div class="logo">⚙ Manutenção</div>
-      <nav class="nav-menu">
-        <button class="nav-btn active" id="nav-painel" onclick="goView('painel')">📊 Painel Geral</button>
-        <button class="nav-btn" id="nav-os" onclick="goView('os')">🔧 Ordens de Serviço</button>
-        <button class="nav-btn" id="nav-tec-link" onclick="goView('tec-link')">📱 Link do Técnico</button>
-      </nav>
-    </aside>
+  <script type="module">
+    import { auth } from './js/firebase.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js';
+    import { database } from './js/firebase.js';
+    import { ref, get } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js';
 
-<main class="main-content-container">
+    // Restore theme before anything renders
+    const savedTheme = localStorage.getItem('os-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.body.style.background = savedTheme === 'light' ? '#f0f4f8' : '#0b1120';
 
-      <button class="menu-toggle" onclick="toggleSidebar()">
-        ☰
-      </button>
-      
-      <section class="view-container active" id="view-painel">
-        <header class="header-row">
-          <h1 class="h1">Painel Executivo</h1>
-        </header>
-        
-        <div class="grid-kpi" id="kpis"></div>
-        
-        <div class="panel-row-container">
-          <article class="panel-card">
-            <header class="card-h">
-              <span class="card-t">Sintomas / Ocorrências Recorrentes</span>
-              <span class="card-n" id="prob-n">0 tipos</span>
-            </header>
-            <div id="prob-rank" class="rank-list"></div>
-          </article>
-          
-          <article class="panel-card">
-            <header class="card-h">
-              <span class="card-t">Histórico de Atendimento (6 Meses)</span>
-            </header>
-            <div class="chart-w" id="month-chart"></div>
-            
-            <header class="card-h sub-header">
-              <span class="card-t">Últimas Atualizações</span>
-            </header>
-            <div id="ultimas-list" class="updates-list"></div>
-          </article>
-        </div>
-      </section>
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      unsubscribe();
+      if (!user) {
+        window.location.replace('login.html');
+        return;
+      }
+      try {
+        const snap = await get(ref(database, `usuarios/${user.uid}`));
+        if (snap.exists() && snap.val().ativo !== false) {
+          window.location.replace('dashboard.html');
+        } else {
+          window.location.replace('login.html');
+        }
+      } catch {
+        window.location.replace('dashboard.html');
+      }
+    });
 
-      <section class="view-container" id="view-os">
-        <header class="header-row">
-          <h1 class="h1">Ordens de Serviço</h1>
-          <button class="btn btn-primary" onclick="openDrawer()">＋ Nova OS</button>
-        </header>
-        
-        <nav class="filters-container">
-          <div class="f-chip on" onclick="setFilter('aberto',this)">Abertas</div>
-          <div class="f-chip" onclick="setFilter('andamento',this)">Andamento</div>
-          <div class="f-chip" onclick="setFilter('assinando',this)">Aguard. Assinatura</div>
-          <div class="f-chip" onclick="setFilter('fechado',this)">Fechadas</div>
-          <div class="f-chip" onclick="setFilter('all',this)">Todas</div>
-        </nav>
-        
-        <div class="os-grid-container" id="os-list"></div>
-      </section>
-
-      <section class="view-container" id="view-tec-link">
-        <header class="header-row">
-          <h1 class="h1">Portal de Assinatura e Execução</h1>
-        </header>
-        
-        <div class="simulation-selector-container">
-          <div class="field">
-            <label>Simular Técnico Acessando OS:</label>
-            <select id="tec-os-select" onchange="renderTecPage(this.value)"></select>
-          </div>
-        </div>
-        
-        <div id="tec-page-wrap">
-          <div class="empty">
-            <div class="empty-icon">📱</div>
-            <p>Selecione uma OS acima para abrir a tela de fechamento do técnico.</p>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <button id="fab" onclick="openDrawer()">＋</button>
-
-  <div class="overlay" id="ov1" onclick="closeDrawer()"></div>
-  <section class="drawer-container" id="drawer1">
-    <header class="drawer-h">
-      <h3 id="drawer-title">Nova OS</h3>
-      <button class="btn btn-sm" onclick="closeDrawer()">✕</button>
-    </header>
-    
-    <form class="drawer-b" onsubmit="event.preventDefault();">
-      <div class="form-row-2col">
-        <div class="field"><label>N° Chamado / OS</label><input id="f-chamado" placeholder="Ex: 24551"></div>
-        <div class="field"><label>Data Abertura</label><input type="date" id="f-data"></div>
-      </div>
-      <div class="field">
-        <label>Tipo de Ocorrência / Sintoma</label>
-        <input id="f-problema" placeholder="Ex: Vazamento de água, lâmpada queimada" list="prob-dl">
-        <datalist id="prob-dl"></datalist>
-      </div>
-      <div class="form-row-2col">
-        <div class="field">
-          <label>Especialidade</label>
-          <select id="f-esp">
-            <option value="Predial">Predial</option>
-            <option value="Elétrica">Elétrica</option>
-            <option value="Hidráulica">Hidráulica</option>
-            <option value="Mecânica">Mecânica</option>
-          </select>
-        </div>
-        <div class="field"><label>Solicitante</label><input id="f-solicitante" placeholder="Ex: Carlos - RH"></div>
-      </div>
-      <div class="field"><label>Local / Área</label><input id="f-area" placeholder="Ex: Bloco B - 2º Andar"></div>
-      <div class="field"><label>Descrição Detalhada do Chamado</label><textarea id="f-desc" placeholder="Descreva mais detalhes caso necessário..."></textarea></div>
-      
-      <div class="field">
-        <label>Técnico Responsável</label>
-        <div class="tec-grid">
-          <div class="tec-opt" id="to-j" onclick="selTec('jhonatan')"><div class="tav av-j">JH</div><span>Jhonatan</span></div>
-          <div class="tec-opt" id="to-jo" onclick="selTec('jorge')"><div class="tav av-jo">JO</div><span>Jorge F.</span></div>
-          <div class="tec-opt" id="to-zh" onclick="selTec('hugo')"><div class="tav av-zh">ZH</div><span>Zé Hugo</span></div>
-        </div>
-      </div>
-      
-      <div class="field">
-        <label>Status Operacional</label>
-        <div class="status-row">
-          <div class="st" data-s="aberto" onclick="selStatus(this)">Aberto</div>
-          <div class="st" data-s="andamento" onclick="selStatus(this)">Andamento</div>
-          <div class="st" data-s="concluido" onclick="selStatus(this)">Concluído</div>
-          <div class="st" data-s="fechado" onclick="selStatus(this)">Fechado</div>
-        </div>
-      </div>
-    </form>
-    
-    <footer class="drawer-f">
-      <button class="btn" onclick="closeDrawer()">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveOS()">Salvar Registro</button>
-    </footer>
-  </section>
-
-  <div id="toast"></div>
-
-  <script type="module" src="js/app.js"></script>
+    // Fallback timeout
+    setTimeout(() => window.location.replace('login.html'), 8000);
+  </script>
 </body>
 </html>
