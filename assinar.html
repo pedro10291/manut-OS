@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirmação de OS — Sistema OS v2</title>
+  <meta name="description" content="Confirmação digital de Ordem de Serviço.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --accent: #3b82f6;
+      --success: #22c55e;
+      --danger:  #ef4444;
+      --warning: #f59e0b;
+      --text:    #0f172a;
+      --text-2:  #334155;
+      --text-3:  #64748b;
+      --border:  #e2e8f0;
+      --bg:      #f8fafc;
+      --surface: #fff;
+      --r:       8px;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .page-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 480px;
+      overflow: hidden;
+    }
+    .card-header {
+      background: linear-gradient(135deg, #1a4480 0%, #2563eb 100%);
+      padding: 28px 24px;
+      color: #fff;
+      text-align: center;
+    }
+    .card-header .logo {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.8;
+      margin-bottom: 8px;
+    }
+    .card-header h1 { font-size: 20px; font-weight: 800; }
+    .card-header p  { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+    .card-body { padding: 24px; }
+
+    /* OS summary */
+    .os-summary {
+      background: #f0f7ff;
+      border: 1px solid #bfdbfe;
+      border-radius: var(--r);
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+    .os-summary-num {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .os-summary-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .os-summary-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 13px;
+      color: var(--text-3);
+    }
+    .os-summary-meta strong { color: var(--text-2); }
+
+    /* PIN inputs */
+    .pin-section { text-align: center; }
+    .pin-section label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-2);
+      margin-bottom: 16px;
+    }
+    .pin-inputs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .pin-inputs input {
+      width: 48px;
+      height: 56px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: 800;
+      border: 2px solid var(--border);
+      border-radius: var(--r);
+      background: var(--bg);
+      color: var(--text);
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    .pin-inputs input:focus {
+      border-color: var(--accent);
+      outline: none;
+      background: #eff6ff;
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--r);
+      border: none;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* States */
+    .state { display: none; }
+    .state.active { display: block; }
+
+    /* Success */
+    .success-icon {
+      width: 72px; height: 72px;
+      background: #dcfce7;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .success-icon svg { width: 36px; height: 36px; color: var(--success); }
+    .success-title { font-size: 22px; font-weight: 800; text-align: center; margin-bottom: 8px; }
+    .success-sub   { font-size: 14px; color: var(--text-3); text-align: center; margin-bottom: 20px; }
+    .audit-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 14px;
+      font-size: 12px;
+      color: var(--text-3);
+      line-height: 1.8;
+    }
+    .audit-box strong { color: var(--text-2); }
+
+    /* Error */
+    .error-icon {
+      width: 72px; height: 72px;
+      background: #fee2e2;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .error-icon svg { width: 36px; height: 36px; color: var(--danger); }
+    .error-title { font-size: 20px; font-weight: 800; text-align: center; margin-bottom: 8px; }
+    .error-sub   { font-size: 14px; color: var(--text-3); text-align: center; }
+
+    /* Spinner */
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid #e2e8f0;
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Alert */
+    .alert {
+      padding: 12px 16px;
+      border-radius: var(--r);
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .alert-error { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: var(--text-3);
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrap">
+    <div class="card">
+      <div class="card-header">
+        <div class="logo">Sistema OS v2</div>
+        <h1>🔐 Confirmação Digital</h1>
+        <p>Verificação de Ordem de Serviço</p>
+      </div>
+      <div class="card-body">
+
+        <!-- Loading state -->
+        <div class="state active" id="state-loading">
+          <div style="text-align:center;padding:40px 0;">
+            <div class="spinner"></div>
+            <div style="font-size:14px;color:#64748b;">Verificando link...</div>
+          </div>
+        </div>
+
+        <!-- Error state -->
+        <div class="state" id="state-error">
+          <div class="error-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          </div>
+          <div class="error-title">Link inválido ou expirado</div>
+          <div class="error-sub" id="error-msg">Este link de confirmação não é válido ou já foi utilizado.</div>
+        </div>
+
+        <!-- Already confirmed state -->
+        <div class="state" id="state-already">
+          <div class="success-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="success-title">Já confirmado!</div>
+          <div class="success-sub">Esta OS já foi confirmada anteriormente.</div>
+        </div>
+
+        <!-- Form state -->
+        <div class="state" id="state-form">
+          <div class="os-summary" id="os-summary-box">
+            <div class="os-summary-num" id="sum-num">OS #00000</div>
+            <div class="os-summary-title" id="sum-title">Carregando...</div>
+            <div class="os-summary-meta">
+              <div>👤 Solicitante: <strong id="sum-sol">—</strong></div>
+              <div>🔧 Técnico: <strong id="sum-tec">—</strong></div>
+            </div>
+          </div>
+
+          <div class="pin-section">
+            <label>Digite o PIN de 6 dígitos recebido por WhatsApp:</label>
+            <div class="pin-inputs" id="pin-inputs-sol"></div>
+            <div id="pin-error" class="alert alert-error hidden">PIN incorreto. Verifique e tente novamente.</div>
+            <button class="btn btn-primary" id="btn-confirmar-sol">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="18" height="18"><polyline points="20 6 9 17 4 12"/></svg>
+              Confirmar Recebimento
+            </button>
+          </div>
+        </div>
+
+        <!-- Success state -->
+        <div class="state" id="state-success">
+          <div class="success-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="success-title">✅ Confirmado com sucesso!</div>
+          <div class="success-sub">Sua confirmação foi registrada. Obrigado!</div>
+          <div class="audit-box" id="audit-box"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <footer>Sistema OS v2 &mdash; Confirmação digital segura</footer>
+
+  <script type="module" src="js/assinar.js"></script>
+</body>
+</html>

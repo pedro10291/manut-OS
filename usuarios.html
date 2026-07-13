@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usuários — Sistema OS v2</title>
+  <meta name="description" content="Gerenciamento de usuários e permissões do Sistema OS.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">`n  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <div id="page-loader">
+    <div class="loader-logo">OS</div>
+    <div class="spinner spinner-lg"></div>
+    <div class="loader-text">Carregando usuários...</div>
+  </div>
+
+  <div class="app-shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar" role="navigation">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </div>
+        <div class="sidebar-brand">
+          <span class="sidebar-brand-name">Sistema OS</span>
+          <span class="sidebar-brand-sub">v2.0</span>
+        </div>
+        <button class="sidebar-toggle" id="sidebar-toggle-desktop" title="Colapsar menu">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/>
+          </svg>
+        </button>
+      </div>
+      <nav class="sidebar-nav">
+        <span class="sidebar-section-label">Principal</span>
+        <a class="nav-item" data-page="dashboard" href="dashboard.html" data-tooltip="Dashboard">
+          <div class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+          <span class="nav-label">Dashboard</span>
+        </a>
+        <a class="nav-item" data-page="os" href="os.html" data-tooltip="OS">
+          <div class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+          <span class="nav-label">Ordens de Serviço</span>
+        </a>
+        <span class="sidebar-section-label">Administração</span>
+        <a class="nav-item active" data-page="usuarios" href="usuarios.html" data-tooltip="Usuários">
+          <div class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+          <span class="nav-label">Usuários</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="avatar avatar-md avatar-purple" id="sidebar-user-avatar">A</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="sidebar-user-name">Carregando...</div>
+            <div class="sidebar-user-role" id="sidebar-user-role">—</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN WRAPPER -->
+    <div class="main-wrapper" id="main-wrapper">
+
+      <!-- Header -->
+      <header class="app-header">
+        <button class="header-menu-btn" id="menu-toggle" aria-label="Menu">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="header-title">Gerenciar Usuários</span>
+        <div class="header-spacer"></div>
+        <div class="header-actions">
+          <button class="header-icon-btn" id="theme-toggle" title="Tema">
+            <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+            <svg id="theme-icon-light" class="hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg>
+          </button>
+          <a href="perfil.html" class="header-icon-btn" title="Perfil"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a>
+          <button class="header-icon-btn" id="btn-logout" title="Sair"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+        </div>
+      </header>
+
+      <main class="page-content">
+
+        <!-- Page Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Usuários & Acessos</h1>
+            <p class="page-subtitle" id="users-count-label">Gerenciamento de contas e permissões</p>
+          </div>
+          <div class="page-header-actions">
+            <button class="btn btn-primary" id="btn-novo-convite">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Convidar Usuário
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabs: Usuários / Técnicos -->
+        <div class="flex gap-2 mb-5" style="border-bottom:1px solid var(--border);padding-bottom:0;">
+          <button class="tab-btn active" data-tab="usuarios" id="tab-usuarios"
+            style="padding:10px 20px;background:none;border:none;border-bottom:2px solid var(--accent);color:var(--accent);font-weight:600;font-size:14px;cursor:pointer;transition:all 0.2s;margin-bottom:-1px;">
+            Usuários do Sistema
+          </button>
+          <button class="tab-btn" data-tab="tecnicos" id="tab-tecnicos"
+            style="padding:10px 20px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-muted);font-weight:500;font-size:14px;cursor:pointer;transition:all 0.2s;margin-bottom:-1px;">
+            Equipe Técnica
+          </button>
+          <button class="tab-btn" data-tab="convites" id="tab-convites"
+            style="padding:10px 20px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-muted);font-weight:500;font-size:14px;cursor:pointer;transition:all 0.2s;margin-bottom:-1px;">
+            Convites Pendentes
+          </button>
+        </div>
+
+        <!-- ── TAB: Usuários ── -->
+        <div id="panel-usuarios">
+          <div class="table-container">
+            <div class="table-scroll">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Usuário</th>
+                    <th>E-mail</th>
+                    <th>Perfil</th>
+                    <th>Técnico vinculado</th>
+                    <th>Cadastro</th>
+                    <th>Status</th>
+                    <th style="text-align:right;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="usuarios-tbody">
+                  <tr><td colspan="7" style="text-align:center;padding:60px;">
+                    <div class="spinner" style="margin:0 auto;"></div>
+                  </td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="table-footer">
+              <span id="usuarios-table-info" style="font-size:12px;color:var(--text-muted);"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── TAB: Técnicos ── -->
+        <div id="panel-tecnicos" class="hidden">
+          <div class="page-header" style="margin-bottom:16px;">
+            <div></div>
+            <button class="btn btn-primary btn-sm" id="btn-novo-tecnico">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Novo Técnico
+            </button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;" id="tecnicos-grid">
+            <div class="skeleton" style="height:120px;border-radius:var(--r-lg);"></div>
+            <div class="skeleton" style="height:120px;border-radius:var(--r-lg);"></div>
+          </div>
+        </div>
+
+        <!-- ── TAB: Convites ── -->
+        <div id="panel-convites" class="hidden">
+          <div class="table-container">
+            <div class="table-scroll">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>E-mail</th>
+                    <th>Perfil</th>
+                    <th>Criado em</th>
+                    <th>Status</th>
+                    <th>Link</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="convites-tbody">
+                  <tr><td colspan="7" style="text-align:center;padding:60px;">
+                    <div class="spinner" style="margin:0 auto;"></div>
+                  </td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ══ DRAWER: Convidar Usuário ══ -->
+  <div class="drawer" id="drawer-convite" role="dialog" aria-modal="true" aria-labelledby="drawer-convite-title">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title" id="drawer-convite-title">Convidar Novo Usuário</div>
+        <div class="drawer-subtitle">Um link de convite será gerado para o cadastro</div>
+      </div>
+      <button class="drawer-close" id="drawer-convite-close" aria-label="Fechar">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="drawer-body">
+      <div class="section-label">Dados do Convite</div>
+
+      <div class="form-group">
+        <label class="form-label form-label-required">Nome completo</label>
+        <input class="form-control" type="text" id="c-nome" placeholder="Ex: Maria Silva">
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail (opcional)</label>
+        <input class="form-control" type="email" id="c-email" placeholder="email@empresa.com">
+        <small style="font-size:11px;color:var(--text-muted);margin-top:4px;">Se informado, o link será pré-preenchido com este e-mail.</small>
+      </div>
+      <div class="form-group">
+        <label class="form-label form-label-required">Perfil de acesso</label>
+        <select class="form-control" id="c-role">
+          <option value="usuario">Usuário (Solicitante)</option>
+          <option value="tecnico">Técnico</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="c-tec-group" style="display:none;">
+        <label class="form-label">Técnico vinculado</label>
+        <select class="form-control" id="c-tecid">
+          <option value="">Selecionar técnico...</option>
+        </select>
+        <small style="font-size:11px;color:var(--text-muted);margin-top:4px;">Associa o acesso deste usuário ao técnico selecionado.</small>
+      </div>
+
+      <!-- Link gerado -->
+      <div id="c-link-result" class="hidden" style="margin-top:16px;">
+        <div class="section-label">Link de Convite Gerado</div>
+        <div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.08em;">Compartilhe este link</div>
+          <div id="c-link-text" style="font-size:12px;color:var(--accent);word-break:break-all;font-family:monospace;"></div>
+        </div>
+        <button class="btn btn-sm w-full" id="btn-copy-link">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copiar Link
+        </button>
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <button class="btn" id="btn-cancelar-convite">Cancelar</button>
+      <button class="btn btn-primary" id="btn-gerar-convite">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        Gerar Convite
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ DRAWER: Novo Técnico ══ -->
+  <div class="drawer" id="drawer-tecnico" role="dialog" aria-modal="true">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title" id="drawer-tec-title">Novo Técnico</div>
+        <div class="drawer-subtitle">Cadastre um técnico para atribuir às OS</div>
+      </div>
+      <button class="drawer-close" id="drawer-tecnico-close" aria-label="Fechar">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body">
+      <input type="hidden" id="tec-edit-id">
+      <div class="form-group">
+        <label class="form-label form-label-required">Nome do Técnico</label>
+        <input class="form-control" type="text" id="tec-nome" placeholder="Ex: João Santos">
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input class="form-control" type="email" id="tec-email" placeholder="joao@empresa.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telefone / WhatsApp</label>
+        <input class="form-control" type="tel" id="tec-tel" placeholder="(11) 99999-9999">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Especialidade</label>
+        <input class="form-control" type="text" id="tec-especialidade" placeholder="Ex: Elétrica, Hidráulica">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Observações</label>
+        <textarea class="form-control" id="tec-obs" rows="3" placeholder="Informações adicionais..."></textarea>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn btn-danger btn-sm hidden" id="btn-delete-tec">Excluir Técnico</button>
+      <div class="flex gap-2 ml-auto">
+        <button class="btn" id="btn-cancelar-tec">Cancelar</button>
+        <button class="btn btn-primary" id="btn-salvar-tec">Salvar Técnico</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: Editar Papel do Usuário ══ -->
+  <div id="modal-editar-usuario" class="hidden">
+    <div class="modal-backdrop" id="modal-editar-backdrop">
+      <div class="modal modal-sm" role="dialog" aria-modal="true" aria-labelledby="modal-editar-title">
+        <div class="modal-header">
+          <h3 class="modal-title" id="modal-editar-title">Editar Usuário</h3>
+          <button class="modal-close" id="modal-editar-close" aria-label="Fechar">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="edit-uid">
+          <div class="form-group">
+            <label class="form-label">Perfil de Acesso</label>
+            <select class="form-control" id="edit-role">
+              <option value="usuario">Usuário (Solicitante)</option>
+              <option value="tecnico">Técnico</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
+          <div class="form-group mt-4">
+            <label class="form-label">Técnico vinculado</label>
+            <select class="form-control" id="edit-tecid">
+              <option value="">Nenhum</option>
+            </select>
+          </div>
+          <div class="form-group mt-4">
+            <label class="form-label">Status da Conta</label>
+            <select class="form-control" id="edit-ativo">
+              <option value="true">Ativo</option>
+              <option value="false">Desativado</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-sm" id="modal-editar-cancel">Cancelar</button>
+          <button class="btn btn-primary btn-sm" id="btn-salvar-edicao">Salvar Alterações</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" role="region" aria-label="Notificações"></div>
+
+  <script type="module" src="js/usuarios.js"></script>
+</body>
+</html>

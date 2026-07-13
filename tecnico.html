@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Técnico — Sistema OS v2</title>
+  <meta name="description" content="Formulário de preenchimento de OS para técnicos.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Page Loader -->
+  <div id="page-loader">
+    <div class="loader-logo">OS</div>
+    <div class="spinner spinner-lg"></div>
+    <div class="loader-text">Carregando OS...</div>
+  </div>
+
+  <div class="app-shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Menu principal">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </div>
+        <div class="sidebar-brand">
+          <span class="sidebar-brand-name">Sistema OS</span>
+          <span class="sidebar-brand-sub">v2.0</span>
+        </div>
+        <button class="sidebar-toggle" id="sidebar-toggle-desktop" title="Colapsar menu">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/>
+          </svg>
+        </button>
+      </div>
+      <nav class="sidebar-nav">
+        <span class="sidebar-section-label">Principal</span>
+        <a class="nav-item" data-page="dashboard" href="dashboard.html" data-tooltip="Dashboard">
+          <div class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+          <span class="nav-label">Dashboard</span>
+        </a>
+        <a class="nav-item" data-page="os" href="os.html" data-tooltip="Todas as OS">
+          <div class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg></div>
+          <span class="nav-label">Todas as OS</span>
+        </a>
+        <a class="nav-item active" data-page="tecnico" href="tecnico.html" data-tooltip="Minhas OS">
+          <div class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg></div>
+          <span class="nav-label">Minhas OS</span>
+          <span class="nav-badge hidden" id="nav-tec-badge">0</span>
+        </a>
+        <span class="sidebar-section-label" data-role="admin">Administração</span>
+        <a class="nav-item" data-page="usuarios" href="usuarios.html" data-role="admin" data-tooltip="Usuários">
+          <div class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+          <span class="nav-label">Usuários</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user" id="sidebar-user-btn">
+          <div class="avatar avatar-md avatar-blue" id="sidebar-user-avatar">T</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="sidebar-user-name">Carregando...</div>
+            <div class="sidebar-user-role" id="sidebar-user-role">—</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main-wrapper" id="main-wrapper">
+
+      <header class="app-header">
+        <button class="header-menu-btn" id="menu-toggle" aria-label="Menu">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="header-title" id="header-title">Painel do Técnico</span>
+        <div class="header-spacer" style="flex:1;"></div>
+        <button class="header-icon-btn" id="theme-toggle" title="Tema">
+          <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+          <svg id="theme-icon-light" class="hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+        </button>
+        <button class="header-icon-btn" id="btn-logout" title="Sair">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </header>
+
+      <main class="page-content" id="tec-main">
+
+        <!-- OS Selector (shown when no ID in URL) -->
+        <div id="tec-os-selector">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Minhas Ordens de Serviço</h1>
+              <p class="page-subtitle" id="tec-subtitle">Selecione uma OS para preencher</p>
+            </div>
+          </div>
+          <div id="tec-os-list" style="display:flex;flex-direction:column;gap:12px;">
+            <div style="text-align:center;padding:60px;color:var(--text-muted);">
+              <div class="spinner" style="margin:0 auto 16px;"></div>
+              <div>Carregando suas ordens...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- OS Form (shown after selecting) -->
+        <div id="tec-os-form" class="hidden">
+
+          <!-- Back button -->
+          <div style="margin-bottom:16px;">
+            <button class="btn btn-sm btn-ghost" id="btn-back-list">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>
+              Voltar para lista
+            </button>
+          </div>
+
+          <!-- OS Header Card -->
+          <div class="card" id="tec-header-card" style="margin-bottom:20px;">
+            <div class="card-body" style="padding:20px;">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                <div>
+                  <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;" id="tec-os-ref">OS #00000</div>
+                  <div style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:8px;line-height:1.2;" id="tec-os-titulo">Carregando...</div>
+                  <div style="font-size:13px;color:var(--text-3);display:flex;flex-wrap:wrap;gap:16px;" id="tec-os-meta"></div>
+                </div>
+                <div id="tec-flow-badge"></div>
+              </div>
+              <!-- Alert for aberta -->
+              <div id="tec-alert-iniciar" class="hidden" style="background:var(--warning-bg);border:1px solid var(--warning);color:var(--warning);padding:12px;border-radius:var(--r);margin-top:14px;font-size:13px;font-weight:600;text-align:center;">
+                👉 Clique em "🚀 Iniciar Serviço" abaixo para dar andamento na atividade.
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION: Equipamento -->
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-header">
+              <div class="card-title">🔧 Identificação do Equipamento</div>
+            </div>
+            <div class="card-body">
+              <div class="form-row">
+                <div class="form-group" style="flex:0 0 130px;">
+                  <label class="form-label">TAG</label>
+                  <input class="form-control" type="text" id="tec-tag" placeholder="Ex: EQ-001">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Descrição do Equipamento</label>
+                  <input class="form-control" type="text" id="tec-desc-equip" placeholder="Ex: Motor trifásico 15CV">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION: SSMA -->
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-header">
+              <div class="card-title">🦺 Preparativos de Segurança / SSMA</div>
+            </div>
+            <div class="card-body">
+              <div class="ssma-group" id="ssma-group">
+                <div class="ssma-item">
+                  <div class="ssma-question">1. Os preparativos de sinalização e bloqueio foram tomados?</div>
+                  <div class="ssma-buttons">
+                    <button class="ssma-btn" data-q="q1" data-v="SIM" onclick="window._setSSMA('q1','SIM')">SIM</button>
+                    <button class="ssma-btn" data-q="q1" data-v="NÃO" onclick="window._setSSMA('q1','NÃO')">NÃO</button>
+                  </div>
+                </div>
+                <div class="ssma-item">
+                  <div class="ssma-question">2. A área foi isolada/sinalizada corretamente com fita/cones?</div>
+                  <div class="ssma-buttons">
+                    <button class="ssma-btn" data-q="q2" data-v="SIM" onclick="window._setSSMA('q2','SIM')">SIM</button>
+                    <button class="ssma-btn" data-q="q2" data-v="NÃO" onclick="window._setSSMA('q2','NÃO')">NÃO</button>
+                  </div>
+                </div>
+                <div class="ssma-item">
+                  <div class="ssma-question">3. O equipamento foi devidamente desenergizado ou identificado com TAG?</div>
+                  <div class="ssma-buttons">
+                    <button class="ssma-btn" data-q="q3" data-v="SIM" onclick="window._setSSMA('q3','SIM')">SIM</button>
+                    <button class="ssma-btn" data-q="q3" data-v="NÃO" onclick="window._setSSMA('q3','NÃO')">NÃO</button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Caso alguma resposta seja "NÃO", indique as ações tomadas:</label>
+                  <textarea class="form-control" id="tec-acoes-ssma" rows="3" placeholder="Descreva as ações tomadas..."></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION: Relatório Técnico -->
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-header">
+              <div class="card-title">📝 Relatório Técnico — Serviço Realizado</div>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <textarea class="form-control" id="tec-servico" rows="5" placeholder="Inicie o serviço para editar o relatório..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION: Peças -->
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-header">
+              <div class="card-title">🔩 Peças / Materiais Utilizados</div>
+            </div>
+            <div class="card-body">
+              <div style="display:grid;grid-template-columns:110px 1fr 80px 36px;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:8px;">
+                <span style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Código</span>
+                <span style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Descrição</span>
+                <span style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Qtd</span>
+                <span></span>
+              </div>
+              <div class="pecas-list" id="pecas-list"></div>
+              <button class="btn-add-peca" id="btn-add-peca" onclick="window._addPeca()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Adicionar Peça
+              </button>
+            </div>
+          </div>
+
+          <!-- SECTION: Verificação / PIN -->
+          <div class="card" id="section-verificacao" style="margin-bottom:20px;">
+            <div class="card-header">
+              <div class="card-title">🔐 Verificação Digital</div>
+            </div>
+            <div class="card-body">
+              <div class="assinatura-status">
+
+                <!-- Técnico -->
+                <div class="assinatura-card">
+                  <div class="assinatura-card-title">Técnico (você)</div>
+                  <div id="tec-sig-status">
+                    <div class="assinatura-badge-pending">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      Aguardando confirmação
+                    </div>
+                  </div>
+                  <div id="tec-pin-section" class="hidden" style="margin-top:12px;">
+                    <div class="pin-display">
+                      <div class="pin-label">🔑 Seu PIN de confirmação</div>
+                      <div class="pin-digits" id="tec-pin-digits"></div>
+                      <div class="pin-expiry" id="tec-pin-expiry"></div>
+                    </div>
+                    <div style="margin-top:12px;">
+                      <label class="form-label" style="margin-bottom:8px;display:block;">Digite o PIN para confirmar:</label>
+                      <div class="pin-input-field" id="tec-pin-inputs"></div>
+                      <button class="btn btn-primary w-full" id="btn-confirmar-tec" style="margin-top:12px;" onclick="window._confirmarTec()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+                        Confirmar com PIN
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Solicitante -->
+                <div class="assinatura-card">
+                  <div class="assinatura-card-title">Solicitante</div>
+                  <div id="sol-sig-status">
+                    <div class="assinatura-badge-pending">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      Aguardando confirmação
+                    </div>
+                  </div>
+                  <div id="sol-whatsapp-section" style="margin-top:10px;" class="hidden">
+                    <button class="btn btn-sm w-full" id="btn-enviar-pin-sol" onclick="window._enviarPinSolicitante()" style="background:#25d366;border-color:#25d366;color:#fff;">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.531 5.855L.057 23.887a.75.75 0 00.916.948l6.188-1.616A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.694 9.694 0 01-4.92-1.337l-.354-.211-3.674.96.978-3.568-.231-.368A9.718 9.718 0 012.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>
+                      Enviar PIN por WhatsApp
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- FOOTER ACTIONS -->
+          <div class="card">
+            <div class="card-body" style="padding:16px;">
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="btn btn-primary" id="btn-salvar-tec" style="flex:1;" onclick="window._salvarTec()">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                  Salvar
+                </button>
+                <button class="btn hidden" id="btn-iniciar-tec" style="flex:1;background:var(--warning);border-color:var(--warning);color:#000;" onclick="window._iniciarServico()">
+                  🚀 Iniciar Serviço
+                </button>
+                <button class="btn hidden" id="btn-concluir-tec" style="flex:1;background:var(--success);border-color:var(--success);color:#fff;" onclick="window._concluirServico()">
+                  ✅ Concluir Serviço
+                </button>
+                <button class="btn btn-ghost hidden" id="btn-pdf-tec" onclick="window._gerarPDF()" style="flex:0 0 auto;">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                  PDF
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /tec-os-form -->
+      </main>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+  <div id="toast-container" role="region" aria-label="Notificações"></div>
+
+  <script type="module" src="js/tecnico.js"></script>
+</body>
+</html>

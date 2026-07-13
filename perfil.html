@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meu Perfil — Sistema OS v2</title>
+  <meta name="description" content="Configurações do perfil e conta do usuário.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">`n  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <div id="page-loader">
+    <div class="loader-logo">OS</div>
+    <div class="spinner spinner-lg"></div>
+  </div>
+
+  <div class="app-shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </div>
+        <div class="sidebar-brand">
+          <span class="sidebar-brand-name">Sistema OS</span>
+          <span class="sidebar-brand-sub">v2.0</span>
+        </div>
+        <button class="sidebar-toggle" id="sidebar-toggle-desktop" title="Colapsar menu">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+        </button>
+      </div>
+      <nav class="sidebar-nav">
+        <span class="sidebar-section-label">Principal</span>
+        <a class="nav-item" data-page="dashboard" href="dashboard.html" data-tooltip="Dashboard">
+          <div class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+          <span class="nav-label">Dashboard</span>
+        </a>
+        <a class="nav-item" data-page="os" href="os.html" data-tooltip="OS">
+          <div class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg></div>
+          <span class="nav-label">Ordens de Serviço</span>
+        </a>
+        <span class="sidebar-section-label" data-role="admin">Administração</span>
+        <a class="nav-item" data-page="usuarios" href="usuarios.html" data-role="admin" data-tooltip="Usuários">
+          <div class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+          <span class="nav-label">Usuários</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="avatar avatar-md avatar-purple" id="sidebar-user-avatar">U</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="sidebar-user-name">—</div>
+            <div class="sidebar-user-role" id="sidebar-user-role">—</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN WRAPPER -->
+    <div class="main-wrapper" id="main-wrapper">
+
+      <header class="app-header">
+        <button class="header-menu-btn" id="menu-toggle" aria-label="Menu">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="header-title">Meu Perfil</span>
+        <div class="header-spacer"></div>
+        <div class="header-actions">
+          <button class="header-icon-btn" id="theme-toggle" title="Tema">
+            <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+            <svg id="theme-icon-light" class="hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg>
+          </button>
+          <button class="header-icon-btn" id="btn-logout" title="Sair">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="page-content">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Meu Perfil</h1>
+            <p class="page-subtitle">Gerencie suas informações e configurações de conta</p>
+          </div>
+        </div>
+
+        <div class="perfil-outer-grid">
+
+          <!-- Left: Avatar Card -->
+          <div>
+            <div class="card" style="text-align:center;padding:32px 24px;">
+              <!-- Avatar grande -->
+              <div style="display:flex;justify-content:center;margin-bottom:20px;">
+                <div class="avatar avatar-xl" id="profile-avatar" style="font-size:28px;">U</div>
+              </div>
+              <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;" id="profile-name">—</div>
+              <div style="margin-bottom:12px;" id="profile-role-badge"></div>
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:20px;" id="profile-email">—</div>
+
+              <div class="divider"></div>
+
+              <div style="display:flex;flex-direction:column;gap:10px;text-align:left;margin-top:16px;">
+                <div style="display:flex;justify-content:space-between;font-size:13px;">
+                  <span style="color:var(--text-muted);">Membro desde</span>
+                  <span style="color:var(--text-2);font-weight:500;" id="profile-since">—</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;">
+                  <span style="color:var(--text-muted);">OS abertas</span>
+                  <span style="color:var(--accent);font-weight:700;" id="profile-os-count">—</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;">
+                  <span style="color:var(--text-muted);">Técnico vinculado</span>
+                  <span style="color:var(--text-2);font-weight:500;" id="profile-tec">—</span>
+                </div>
+              </div>
+
+              <div class="divider"></div>
+              <button class="btn btn-danger w-full" id="btn-logout-profile" style="margin-top:8px;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Sair do Sistema
+              </button>
+            </div>
+          </div>
+
+          <!-- Right: Settings -->
+          <div style="display:flex;flex-direction:column;gap:20px;">
+
+            <!-- Aparência -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">⚙️ Aparência</div>
+              </div>
+              <div class="card-body" style="display:flex;flex-direction:column;gap:16px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div>
+                    <div style="font-size:14px;font-weight:600;color:var(--text);">Tema da interface</div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Escolha entre claro e escuro</div>
+                  </div>
+                  <div style="display:flex;gap:8px;">
+                    <button class="btn btn-sm" id="theme-dark-btn">
+                      🌙 Escuro
+                    </button>
+                    <button class="btn btn-sm" id="theme-light-btn">
+                      ☀️ Claro
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Segurança -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">🔒 Segurança</div>
+              </div>
+              <div class="card-body" style="display:flex;flex-direction:column;gap:16px;">
+                <div>
+                  <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">Redefinir Senha</div>
+                  <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Um link de redefinição será enviado para seu e-mail.</div>
+                  <button class="btn btn-sm" id="btn-reset-pwd">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                    Enviar Link de Redefinição
+                  </button>
+                  <div id="pwd-reset-msg" class="hidden" style="margin-top:10px;"></div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div>
+                  <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">Tempo de inatividade</div>
+                  <div style="font-size:12px;color:var(--text-muted);">Sua sessão é encerrada automaticamente após 45 minutos de inatividade.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Informações do sistema -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">ℹ️ Sobre o Sistema</div>
+              </div>
+              <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;justify-content:space-between;font-size:13px;">
+                  <span style="color:var(--text-muted);">Versão</span>
+                  <span style="color:var(--text-2);font-weight:600;">Sistema OS v2.0</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;">
+                  <span style="color:var(--text-muted);">Backend</span>
+                  <span style="color:var(--text-2);">Firebase Realtime Database</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;">
+                  <span style="color:var(--text-muted);">Numeração OS</span>
+                  <span style="color:var(--accent);font-weight:700;" id="proximo-os-num">—</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;">
+                  <span style="color:var(--text-muted);">Data/Hora atual</span>
+                  <span style="color:var(--text-2);" id="current-time">—</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+  <div id="toast-container" role="region" aria-label="Notificações"></div>
+
+  <script type="module" src="js/perfil.js"></script>
+</body>
+</html>

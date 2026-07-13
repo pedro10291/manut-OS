@@ -1,0 +1,447 @@
+/* =======================================================
+   SISTEMA OS v2 — Responsive CSS
+   Breakpoints: xs < 480 | sm < 640 | md < 768 | lg < 1024
+   ======================================================= */
+
+/* ══════════════════════════════════════════════════════
+   GLOBAL — prevent horizontal scroll
+   ══════════════════════════════════════════════════════ */
+body {
+  overflow-x: hidden;
+}
+
+
+/* ── Desktop: sidebar toggle works via JS adding .sidebar-collapsed ── */
+@media (min-width: 769px) {
+  /* Sidebar always on-screen on desktop */
+  .sidebar {
+    transform: none !important;
+  }
+  /* Header hamburger still shows for collapse toggle */
+  .header-menu-btn {
+    display: flex;
+  }
+}
+
+/* ── Mobile: sidebar off-canvas, content full-width ── */
+@media (max-width: 768px) {
+  .main-wrapper {
+    margin-left: 0 !important;
+    width: auto !important;
+  }
+  .sidebar {
+    transform: translateX(-100%) !important;
+    width: var(--sidebar-w) !important;
+    z-index: var(--z-drawer);
+    box-shadow: none;
+    transition: transform var(--t-slow), box-shadow var(--t-slow) !important;
+  }
+  .sidebar.mobile-open {
+    transform: translateX(0) !important;
+    box-shadow: 8px 0 32px rgba(0,0,0,0.4);
+  }
+
+  /* Page content: tight padding */
+  .page-content {
+    padding: 14px 12px;
+  }
+
+  /* Page header: stack on mobile */
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .page-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+  }
+  .page-header-actions .btn {
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
+  }
+  .page-title  { font-size: 20px; }
+  .page-subtitle { font-size: 12px; }
+
+  /* Header: compact */
+  .app-header {
+    padding: 0 10px;
+    gap: 6px;
+  }
+  .header-title {
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Hide sidebar desktop toggle */
+  #sidebar-toggle-desktop {
+    display: none !important;
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════
+   2. DASHBOARD
+   ══════════════════════════════════════════════════════ */
+
+@media (max-width: 1100px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .dashboard-side {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+}
+@media (max-width: 768px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .kpi-card { padding: 14px; }
+  .kpi-value { font-size: 22px; }
+  .kpi-icon { width: 38px; height: 38px; }
+  .kpi-icon svg { width: 17px; height: 17px; }
+}
+@media (max-width: 480px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .kpi-value { font-size: 18px; }
+  .kpi-label { font-size: 11px; }
+  .dashboard-side { grid-template-columns: 1fr; }
+  .kpi-delta { display: none; }
+}
+
+/* ══════════════════════════════════════════════════════
+   3. TABLES
+   ══════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .table-container {
+    border-radius: var(--r);
+  }
+  /* Force horizontal scroll on narrow screens */
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    min-width: 0;
+  }
+  .table-scroll table {
+    min-width: 580px;
+  }
+
+  /* Table footer: stack */
+  .table-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+  .pagination { justify-content: center; width: 100%; }
+
+  /* Hide less-important columns on mobile */
+  .col-hide-mobile { display: none !important; }
+
+  /* Smaller page buttons */
+  .page-btn { width: 28px; height: 28px; font-size: 12px; }
+
+  /* SLA bar hidden on mobile */
+  .sla-bar-wrap { display: none; }
+}
+
+/* ══════════════════════════════════════════════════════
+   4. OS PAGE
+   ══════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  /* Filter bar: horizontal scroll */
+  .filter-bar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+    gap: 6px;
+  }
+  .chip { flex-shrink: 0; height: 30px; padding: 0 10px; font-size: 12px; }
+
+  /* Search bar: full width */
+  .search-bar, .search-input {
+    width: 100% !important;
+  }
+
+  /* OS top bar stacks */
+  .os-toolbar {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   5. DRAWERS — slide from right (mobile: from bottom)
+   ══════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+  .drawer,
+  .drawer-wide {
+    /* Convert to bottom sheet */
+    top: auto !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 90dvh !important;
+    border-radius: 20px 20px 0 0 !important;
+    border-left: none !important;
+    border-top: 1px solid var(--border);
+    transform: translateX(0) translateY(100%) !important;
+    transition: transform var(--t-slow) !important;
+  }
+  .drawer.open {
+    transform: translateX(0) translateY(0) !important;
+  }
+
+  /* Drawer handle indicator */
+  .drawer-header::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 99px;
+  }
+  .drawer-header {
+    position: relative;
+    padding-top: 22px;
+  }
+
+  /* Drawer footer: stack */
+  .drawer-footer {
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+  .drawer-footer .btn { width: 100%; justify-content: center; }
+  .drawer-footer .ml-auto { margin-left: 0; width: 100%; }
+  .drawer-footer .flex { width: 100%; gap: 8px; }
+  .drawer-footer .flex .btn { flex: 1; }
+  .drawer-footer #btn-delete-tec,
+  .drawer-footer #btn-deletar-os { width: 100%; }
+}
+
+/* ══════════════════════════════════════════════════════
+   6. MODALS
+   ══════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+  .modal-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .modal, .modal-sm {
+    max-width: 100% !important;
+    width: 100% !important;
+    border-radius: 16px 16px 0 0 !important;
+    margin: 0 !important;
+  }
+  .modal-footer {
+    gap: 8px;
+  }
+  .modal-footer .btn { flex: 1; justify-content: center; }
+}
+
+/* ══════════════════════════════════════════════════════
+   7. FORMS
+   ══════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+  .form-row,
+  .form-row-3 {
+    grid-template-columns: 1fr;
+  }
+  /* Prevent iOS zoom on input focus */
+  .form-control,
+  .lf-input,
+  select.form-control,
+  textarea.form-control {
+    font-size: 16px !important;
+  }
+  .tec-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+  .status-selector {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .status-opt {
+    padding: 6px 10px;
+    font-size: 12px;
+    flex: 1;
+    text-align: center;
+    min-width: 80px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   8. PERFIL PAGE — fix inline grid
+   ══════════════════════════════════════════════════════ */
+
+/* Override the inline style grid on profile page */
+@media (max-width: 900px) {
+  /* Target the profile layout grid (320px 1fr) */
+  .perfil-outer-grid {
+    grid-template-columns: 1fr !important;
+  }
+  /* For the inline style we can't override without !important on a class */
+}
+
+/* ══════════════════════════════════════════════════════
+   9. USUARIOS — tabs + tecnicos grid
+   ══════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  /* Make tabs scrollable */
+  .tab-scroll-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .tab-scroll-wrap .tab-btn {
+    flex-shrink: 0;
+  }
+  #tecnicos-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+@media (max-width: 480px) {
+  #tecnicos-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   10. LOGIN PAGE
+   ══════════════════════════════════════════════════════ */
+
+@media (max-width: 900px) {
+  .login-left { display: none; }
+  .login-right {
+    width: 100%;
+    padding: 40px 20px;
+    background: var(--bg);
+    border-left: none;
+    backdrop-filter: none;
+  }
+  .login-card { max-width: 420px; margin: 0 auto; }
+}
+@media (max-width: 480px) {
+  .login-right { padding: 20px 14px; }
+  .login-card-header h2 { font-size: 20px; }
+  .btn-login { height: 44px; font-size: 14px; }
+  .lf-input { height: 42px; }
+}
+
+/* ══════════════════════════════════════════════════════
+   11. TOAST — mobile position + width
+   ══════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+  #toast-container {
+    bottom: 12px;
+    right: 10px;
+    left: 10px;
+    max-width: 100%;
+    width: calc(100vw - 20px);
+  }
+  .toast { max-width: 100%; }
+}
+
+/* ══════════════════════════════════════════════════════
+   12. HEADER — very small phones
+   ══════════════════════════════════════════════════════ */
+
+@media (max-width: 400px) {
+  .app-header { padding: 0 8px; gap: 4px; }
+  .header-icon-btn { width: 30px; height: 30px; }
+  .header-icon-btn svg { width: 14px; height: 14px; }
+  .header-title { font-size: 13px; }
+}
+
+/* ══════════════════════════════════════════════════════
+   13. TOUCH IMPROVEMENTS
+   ══════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  /* Minimum 44px tap targets */
+  .btn { min-height: 38px; }
+  .nav-item { min-height: 44px; }
+
+  /* Disable transform hover effects on touch */
+  .os-card:hover { transform: none; box-shadow: var(--shadow-sm); }
+  .btn-login:hover { transform: none; }
+
+  /* Smooth scroll areas */
+  .drawer-body,
+  .sidebar-nav,
+  .table-scroll,
+  .filter-bar {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Bigger close button on drawers */
+  .drawer-close { width: 36px; height: 36px; }
+  .drawer-close svg { width: 16px; height: 16px; }
+
+  /* Safe area bottom padding for devices with home indicator */
+  .drawer-footer {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   14. PRINT
+   ══════════════════════════════════════════════════════ */
+
+@media print {
+  .sidebar, .app-header, .drawer,
+  .overlay, #toast-container, #page-loader,
+  .page-header-actions, .filter-bar, .table-footer { display: none !important; }
+  .main-wrapper { margin-left: 0 !important; }
+  .page-content { padding: 0; }
+  body { background: white; color: black; }
+  .card { box-shadow: none; border: 1px solid #e2e8f0; }
+}
+
+/* ══════════════════════════════════════════════════════
+   15. MISC FIXES
+   ══════════════════════════════════════════════════════ */
+
+/* Prevent long words from breaking layout */
+.page-title, .drawer-title, .card-title,
+.toast-title, .toast-msg {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Smooth image rendering on scaled avatars */
+.avatar {
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* OS table: wrap long titles */
+.os-table-title {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 768px) {
+  .os-table-title { max-width: 140px; }
+}

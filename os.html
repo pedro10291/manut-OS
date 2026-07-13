@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ordens de Serviço — Sistema OS v2</title>
+  <meta name="description" content="Gerenciamento completo de Ordens de Serviço.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">`n  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Page Loader -->
+  <div id="page-loader">
+    <div class="loader-logo">OS</div>
+    <div class="spinner spinner-lg"></div>
+    <div class="loader-text">Carregando ordens...</div>
+  </div>
+
+  <div class="app-shell">
+
+    <!-- SIDEBAR (same as dashboard) -->
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Menu principal">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </div>
+        <div class="sidebar-brand">
+          <span class="sidebar-brand-name">Sistema OS</span>
+          <span class="sidebar-brand-sub">v2.0</span>
+        </div>
+        <button class="sidebar-toggle" id="sidebar-toggle-desktop" title="Colapsar menu">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/>
+          </svg>
+        </button>
+      </div>
+      <nav class="sidebar-nav">
+        <span class="sidebar-section-label">Principal</span>
+        <a class="nav-item" data-page="dashboard" href="dashboard.html" data-tooltip="Dashboard">
+          <div class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+          <span class="nav-label">Dashboard</span>
+        </a>
+        <a class="nav-item active" data-page="os" href="os.html" data-tooltip="OS">
+          <div class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+          <span class="nav-label">Ordens de Serviço</span>
+          <span class="nav-badge hidden" id="nav-os-badge">0</span>
+        </a>
+        <a class="nav-item" data-page="tecnico" href="tecnico.html" data-tooltip="Painel Técnico">
+          <div class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg></div>
+          <span class="nav-label">Painel Técnico</span>
+        </a>
+        <span class="sidebar-section-label" data-role="admin">Administração</span>
+        <a class="nav-item" data-page="usuarios" href="usuarios.html" data-role="admin" data-tooltip="Usuários">
+          <div class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+          <span class="nav-label">Usuários</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user" id="sidebar-user-btn">
+          <div class="avatar avatar-md avatar-purple" id="sidebar-user-avatar">U</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="sidebar-user-name">Carregando...</div>
+            <div class="sidebar-user-role" id="sidebar-user-role">—</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN WRAPPER -->
+    <div class="main-wrapper" id="main-wrapper">
+
+      <!-- Header -->
+      <header class="app-header">
+        <button class="header-menu-btn" id="menu-toggle" aria-label="Menu">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="header-title">Ordens de Serviço</span>
+        <div class="header-spacer"></div>
+        <div class="header-actions">
+          <button class="header-icon-btn" id="theme-toggle" title="Tema">
+            <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+            <svg id="theme-icon-light" class="hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg>
+          </button>
+          <a href="perfil.html" class="header-icon-btn" title="Perfil"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a>
+          <button class="header-icon-btn" id="btn-logout" title="Sair"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+        </div>
+      </header>
+
+      <!-- Page Content -->
+      <main class="page-content">
+
+        <!-- Page Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Ordens de Serviço</h1>
+            <p class="page-subtitle" id="os-count-label">Carregando...</p>
+          </div>
+          <div class="page-header-actions">
+            <button class="btn" id="btn-export-excel" title="Exportar Excel">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Excel
+            </button>
+            <button class="btn btn-primary" id="btn-nova-os">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nova OS
+            </button>
+          </div>
+        </div>
+
+        <!-- Toolbar: Search + Filters -->
+        <div class="flex items-center justify-between gap-4 mb-4" style="flex-wrap:wrap;">
+          <div class="filter-bar" id="filter-bar">
+            <div class="chip active" data-filter="todas">Todas</div>
+            <div class="chip" data-filter="aberta">Abertas</div>
+            <div class="chip" data-filter="andamento">Andamento</div>
+            <div class="chip" data-filter="finalizada">Finalizadas</div>
+            <div class="chip" data-filter="cancelada">Canceladas</div>
+          </div>
+          <div class="flex items-center gap-2" style="flex-wrap:wrap;">
+            <!-- Priority filter -->
+            <select class="form-control" id="filter-priority" style="height:36px;width:auto;padding-right:32px;" title="Filtrar por prioridade">
+              <option value="">Prioridade</option>
+              <option value="alta">Alta</option>
+              <option value="media">Média</option>
+              <option value="baixa">Baixa</option>
+            </select>
+            <!-- Tech filter -->
+            <select class="form-control" id="filter-tec" style="height:36px;width:auto;padding-right:32px;" title="Filtrar por técnico">
+              <option value="">Todos técnicos</option>
+            </select>
+            <!-- Search -->
+            <div class="search-bar">
+              <span class="search-bar-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+              <input type="search" class="search-input" id="search-input" placeholder="Buscar OS..." autocomplete="off">
+            </div>
+          </div>
+        </div>
+
+        <!-- OS Table -->
+        <div class="table-container">
+          <div class="table-scroll">
+            <table class="table" id="os-table">
+              <thead>
+                <tr>
+                  <th class="sortable" data-sort="numero">N° OS</th>
+                  <th>Título / Categoria</th>
+                  <th class="hide-mobile">Solicitante</th>
+                  <th>Técnico</th>
+                  <th>Status</th>
+                  <th class="hide-mobile">Prioridade</th>
+                  <th class="hide-mobile">SLA</th>
+                  <th class="hide-mobile sortable" data-sort="criadoEm">Abertura</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="os-tbody">
+                <tr><td colspan="9" style="text-align:center;padding:60px;color:var(--text-muted);">
+                  <div class="spinner" style="margin:0 auto;"></div>
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span id="table-info" style="font-size:12px;color:var(--text-muted);"></span>
+            <div class="pagination" id="pagination"></div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ══════════════ DRAWER: Nova / Editar OS ══════════════ -->
+  <div class="drawer drawer-wide" id="drawer-os" role="dialog" aria-modal="true" aria-labelledby="drawer-os-title">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title" id="drawer-os-title">Nova Ordem de Serviço</div>
+        <div class="drawer-subtitle" id="drawer-os-number"></div>
+      </div>
+      <button class="drawer-close" id="drawer-os-close" aria-label="Fechar">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="drawer-body" id="drawer-os-body">
+      <!-- SECTION: Identificação -->
+      <div class="section-label">Identificação</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label form-label-required">Título / Ocorrência</label>
+          <input class="form-control" type="text" id="f-titulo" placeholder="Ex: Lâmpada queimada no Bloco B" maxlength="120">
+        </div>
+        <div class="form-group">
+          <label class="form-label form-label-required">Categoria</label>
+          <select class="form-control" id="f-categoria">
+            <option value="">Selecionar...</option>
+            <option>Elétrica</option>
+            <option>Hidráulica</option>
+            <option>Predial</option>
+            <option>Mecânica</option>
+            <option>HVAC / Climatização</option>
+            <option>TI / Infraestrutura</option>
+            <option>Limpeza</option>
+            <option>Segurança</option>
+            <option>Outros</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Especialidade</label>
+          <select class="form-control" id="f-especialidade">
+            <option value="">Selecionar...</option>
+            <option>Elétrica</option>
+            <option>Mecânica</option>
+            <option>Instrumentação</option>
+            <option>Civil</option>
+            <option>HVAC / Refrigeração</option>
+            <option>TI / Redes</option>
+            <option>Hidráulica / Sanitária</option>
+            <option>Automação</option>
+            <option>Segurança do Trabalho</option>
+            <option>Outros</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipo de Serviço</label>
+          <select class="form-control" id="f-tipo-servico">
+            <option value="">Selecionar...</option>
+            <option value="corretiva">Corretiva</option>
+            <option value="preventiva">Preventiva</option>
+            <option value="preditiva">Preditiva</option>
+            <option value="melhoria">Melhoria</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label form-label-required">Setor</label>
+          <input class="form-control" type="text" id="f-setor" placeholder="Ex: Recursos Humanos" list="setores-dl">
+          <datalist id="setores-dl"></datalist>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Local / Área</label>
+          <input class="form-control" type="text" id="f-local" placeholder="Ex: Bloco B - 2° Andar, Sala 204">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label form-label-required">Descrição Detalhada</label>
+        <textarea class="form-control" id="f-descricao" rows="4" placeholder="Descreva o problema com o máximo de detalhes possível..."></textarea>
+      </div>
+
+      <!-- SECTION: Atribuição -->
+      <div class="section-label">Atribuição</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label form-label-required">Solicitante</label>
+          <input class="form-control" type="text" id="f-solicitante" placeholder="Nome do solicitante">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prioridade</label>
+          <select class="form-control" id="f-prioridade">
+            <option value="media">Média</option>
+            <option value="alta">Alta</option>
+            <option value="baixa">Baixa</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Técnico Responsável</label>
+        <div class="tec-grid" id="f-tec-grid">
+          <div style="font-size:12px;color:var(--text-muted);padding:8px;">Carregando técnicos...</div>
+        </div>
+        <input type="hidden" id="f-tecid">
+        <input type="hidden" id="f-tecnome">
+      </div>
+
+      <!-- SECTION: Datas e SLA -->
+      <div class="section-label">Datas e SLA</div>
+
+      <div class="form-row-3">
+        <div class="form-group">
+          <label class="form-label">Data de Abertura</label>
+          <input class="form-control" type="date" id="f-data-abertura">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prazo SLA</label>
+          <input class="form-control" type="date" id="f-prazo">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Previsão de Conclusão</label>
+          <input class="form-control" type="date" id="f-previsao">
+        </div>
+      </div>
+
+      <!-- SECTION: Status -->
+      <div class="section-label" id="section-status">Status</div>
+      <div class="status-selector" id="f-status-selector">
+        <div class="status-opt" data-status="aberta">🔵 Aberta</div>
+        <div class="status-opt" data-status="andamento">🟡 Em Andamento</div>
+        <div class="status-opt" data-status="finalizada">🟢 Finalizada</div>
+        <div class="status-opt" data-status="cancelada">🔴 Cancelada</div>
+      </div>
+      <input type="hidden" id="f-status" value="aberta">
+
+      <!-- SECTION: Solução (visible when finalizada) -->
+      <div id="section-solucao" class="hidden">
+        <div class="section-label">Solução Aplicada</div>
+        <div class="form-group">
+          <textarea class="form-control" id="f-solucao" rows="3" placeholder="Descreva a solução aplicada..."></textarea>
+        </div>
+      </div>
+
+      <!-- SECTION: Histórico (only on edit) -->
+      <div id="section-historico" class="hidden">
+        <div class="section-label">Histórico de Alterações</div>
+        <div class="timeline" id="historico-timeline">
+          <div style="font-size:12px;color:var(--text-muted);">Nenhum histórico registrado.</div>
+        </div>
+      </div>
+
+      <!-- SECTION: Verificação Digital (only on edit, for admin) -->
+      <div id="section-verificacao-admin" class="hidden" data-role="admin">
+        <div class="section-label">Verificação Digital</div>
+        <div class="assinatura-status" style="margin-bottom:12px;">
+          <div class="assinatura-card">
+            <div class="assinatura-card-title">Técnico</div>
+            <div id="admin-tec-sig"><div class="assinatura-badge-pending"><span>⏳</span> Aguardando</div></div>
+          </div>
+          <div class="assinatura-card">
+            <div class="assinatura-card-title">Solicitante</div>
+            <div id="admin-sol-sig"><div class="assinatura-badge-pending"><span>⏳</span> Aguardando</div></div>
+            <div id="admin-sol-action" class="hidden" style="margin-top:10px;">
+              <button class="btn btn-sm w-full" id="btn-solicitar-pin-sol" style="background:#25d366;border-color:#25d366;color:#fff;font-size:12px;">
+                📲 Solicitar confirmação via WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center;">
+          <a id="btn-abrir-tecnico" href="#" target="_blank" class="btn btn-sm btn-ghost" style="display:inline-flex;gap:6px;font-size:12px;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Abrir no Painel do Técnico
+          </a>
+        </div>
+      </div>
+
+    </div><!-- /drawer-body -->
+
+    <div class="drawer-footer">
+      <div id="drawer-os-actions-left">
+        <button class="btn btn-danger btn-sm hidden" id="btn-delete-os">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+          Excluir
+        </button>
+        <button class="btn btn-sm hidden" id="btn-print-pdf">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          PDF
+        </button>
+      </div>
+      <div class="flex gap-2 ml-auto">
+        <button class="btn" id="btn-cancelar-os">Cancelar</button>
+        <button class="btn btn-primary" id="btn-salvar-os">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Salvar OS
+        </button>
+      </div>
+    </div>
+  </div><!-- /drawer-os -->
+
+  <!-- Toast -->
+  <div id="toast-container" role="region" aria-label="Notificações"></div>
+
+  <script type="module" src="js/os.js"></script>
+</body>
+</html>
